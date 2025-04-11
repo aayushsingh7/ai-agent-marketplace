@@ -1,0 +1,99 @@
+.sidenav {
+    background: #fff;
+    width: 300px;
+    border-right: 3px solid #efefef;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+    transition: 0.5s ease-in-out;
+    padding: 6px;
+    position: sticky;
+    top: 0;  
+}
+  
+  .sidenav h2 {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    color: #b30000;
+  }
+  
+  .sidenav h2 span {
+    color: #000;
+  }
+  
+  .sidenav ul {
+    margin-top: 60px;
+    padding: 0 10px;
+  }
+  
+  .sidenav ul li {
+    list-style: none;
+    border-radius: 5px;
+    padding: 0 15px;
+  }
+  
+  .sidenav ul li a {
+    padding: 12px 0;
+    color: #000;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 0.7rem;
+    width: 100%;
+    border-bottom: 1px solid #e7e7e7;
+  }
+  
+  .sidenav ul li a span {
+    font-size: 10px;
+    color: #fff;
+    background: #008cff;
+    padding: 3px 10px;
+    font-weight: 600;
+    margin-left: 10px;
+    border-radius: 5px;
+  }
+  
+  .sidenav ul li:hover {
+    background: #efefef;
+  }
+  
+  .sidenav ul li a svg {
+    font-size: 24px;
+    display: none;
+    margin-right: 10px;
+  }
+  
+  .sidenav h2 svg {
+    cursor: pointer;
+    display: none;
+  }
+  
+  .show {
+    left: 0;
+  }
+  
+  .hide {
+    left: 0;
+  }
+  
+  @media (max-width: 900px) {
+    .sidenav {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 10;
+    }
+  
+    .sidenav h2 svg {
+      display: block;
+    }
+  
+    .hide {
+      left: -1000%;
+    }
+  }
+  

@@ -1,0 +1,122 @@
+.agent_box_main{
+    padding: 10px 20px;
+    border: 2px solid #efefef;
+    border-radius: 10px;
+    transition: 0.5s ease-in-out;
+    cursor: pointer;
+}
+
+.agent_box{
+    display: flex;
+    width: 100%;
+}
+
+.agent_box_main:hover{
+    box-shadow: #b300009c 0px 3px 8px;
+    border: 2px solid #b30000;
+}
+
+.image_section{
+    /* width: 100px; */
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+
+.agent_image{
+    width: 45px;
+    height: 45px;
+    overflow: hidden;
+    border-radius: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* border-radius: 50%; */
+}
+
+.agent_image img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.agent_caption{
+    width: 100%;
+    /* background:pink; */
+    padding:5px 15px
+}
+
+.agent_caption h4{
+    font-size: 0.6rem;
+    align-items: center;
+    display: flex;
+}
+
+.agent_caption h4 span{
+    color: #b30000;
+    font-size: 18px;
+    display: flex;
+    margin-left: 5px;
+    align-items: center;
+}
+
+.agent_caption p{
+    font-size: 0.54rem;
+    margin-top: 10px;
+    color: #636363;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tags_container{
+    margin-top: 15px;
+    font-size: 0.55rem;
+    display: flex;
+}
+
+.tag svg{
+    font-size: 14px;
+    margin-right: 5px;
+
+}
+
+/* .tag:nth-child(2) svg{
+    position: relative;
+    top: 1px;
+} */
+
+.tag{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:  #efefef;
+    flex-shrink: 0;
+    padding: 5px 8px;
+    margin-right: 5px;
+    border-radius: 5px;
+}
+
+.total_used{
+    font-size: 0.5rem;
+    color: #636363;
+    display: block;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+.total_used span{
+    color: #b30000;
+}
+
+.agent_type_tag{
+    font-size: 0.5rem;
+    padding: 5px 8px;
+    background: #efefef;
+    border-radius: 5px;
+    display: inline-block;
+    font-weight: 600;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
