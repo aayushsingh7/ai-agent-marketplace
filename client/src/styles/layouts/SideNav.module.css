@@ -1,7 +1,5 @@
 .sidenav {
     background: #fff;
-    width: 300px;
-    border-right: 3px solid #efefef;
     height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -11,8 +9,15 @@
     padding: 6px;
     position: sticky;
     top: 0;  
-}
+    border-right: 3px solid #efefef;
+  }
   
+  .normal{
+    width: 300px;
+}
+.small{
+  width: 230px;
+}
   .sidenav h2 {
     padding: 20px;
     display: flex;
@@ -33,21 +38,30 @@
   .sidenav ul li {
     list-style: none;
     border-radius: 5px;
-    padding: 0 15px;
+    padding: 0 10px;
   }
+
+.normal li  {
+  font-size: 0.7rem;
+  border-bottom: 1px solid #e7e7e7;
+  color: #000;
+}
+
+.small li {
+  font-size: 0.7rem;
+  color: #4d4d4d;
+}
   
-  .sidenav ul li a {
-    padding: 12px 0;
-    color: #000;
+  .sidenav ul li {
+    padding: 12px 10px;
     display: flex;
     align-items: center;
     text-decoration: none;
-    font-size: 0.7rem;
     width: 100%;
-    border-bottom: 1px solid #e7e7e7;
+    cursor: pointer;
   }
   
-  .sidenav ul li a span {
+  .sidenav ul li span {
     font-size: 10px;
     color: #fff;
     background: #008cff;
@@ -61,7 +75,7 @@
     background: #efefef;
   }
   
-  .sidenav ul li a svg {
+  .sidenav ul li  svg {
     font-size: 24px;
     display: none;
     margin-right: 10px;

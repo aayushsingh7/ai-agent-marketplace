@@ -96,3 +96,52 @@ Want to add your own AI bot? Reach out or fork the project — let's decentraliz
 
 MIT — Open to innovation, transparency, and freedom.
 
+
+
+
+### cosmjs
+
+```js
+// Example: Connect SEI wallet
+const connectWallet = async () => {
+  if (!window.keplr) {
+    alert("Install Keplr-compatible wallet like Compass or Fin Wallet");
+    return;
+  }
+
+  const chainId = "atlantic-2"; // or your target SEI testnet/mainnet chain ID
+
+  await window.keplr.enable(chainId);
+  const offlineSigner = window.getOfflineSigner(chainId);
+  const accounts = await offlineSigner.getAccounts();
+
+  console.log("Wallet Address:", accounts[0].address);
+};
+// Send Wallet Address & TX info to Backend (API call).
+```
+
+```shell
+npm install @cosmjs/stargate @sei-js/core
+```
+
+```js
+// Broadcast Transaction:
+const { SigningStargateClient } = require("@cosmjs/stargate");
+
+const sendTokens = async () => {
+  const rpc = "https://rpc.atlantic-2.seinetwork.io"; // SEI testnet RPC
+  const client = await SigningStargateClient.connectWithSigner(rpc, signer);
+
+  const result = await client.sendTokens(
+    fromAddress,
+    toAddress,
+    [{ denom: "usei", amount: "100000" }], // 0.1 SEI
+    {
+      amount: [{ denom: "usei", amount: "5000" }], // gas
+      gas: "200000",
+    }
+  );
+
+  console.log("Transaction result:", result);
+};
+```

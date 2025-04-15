@@ -7,6 +7,7 @@ import Subscription from "./pages/Subscription";
 import Upload from "./pages/Upload";
 import Settings from "./pages/Settings";
 import SideNav from "./layouts/SideNav";
+import Auth from "./pages/Auth";
 
 interface AppProps { }
 
@@ -15,11 +16,12 @@ const App: FC<AppProps> = ({ }) => {
     <div>
      <Routes>
         <Route path="/" element={<Home/>}/>
-        <Route path="/subscriptions" element={<div className="flex-page"><SideNav/><Subscription/></div>}/>
-        <Route path="/upload" element={<div className="flex-page"><SideNav/><Upload/></div>}/>
-        <Route path="/settings" element={<div className="flex-page"><SideNav/><Settings/></div>} />
-        <Route path="/marketplace" element={<div className="flex-page"><SideNav/><MarketPlace/></div>}/>
+        <Route path="/subscriptions" element={<div className="flex-page"><SideNav type="normal"/></div>}/>
+        <Route path="/upload" element={<div className="flex-page"><SideNav type="normal"/><Upload/></div>}/>
+        <Route path="/settings" element={<div className="flex-page"><SideNav type="normal"/><Settings/></div>} />
+        <Route path="/marketplace" element={<div className="flex-page"><SideNav type="normal"/><MarketPlace/></div>}/>
         <Route path="/marketplace/agents/:agentID" element={<ViewAgent/>}/>
+        <Route path="/auth" element={<Auth/>} />
      </Routes>
     </div>
   );

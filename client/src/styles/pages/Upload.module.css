@@ -1,0 +1,39 @@
+.upload_page{
+    padding-left: 20px;
+}
+
+.form{
+    margin-top: 20px;
+    width: 60%;
+}
+
+
+.input_field{
+    margin-top: 5px;
+}
+
+.input_field span{
+    font-size: 0.56rem;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #666666;
+    display: inline-block;
+}
+
+.input_field input{
+    font-size: 0.56rem;
+    padding: 10px ;
+    border: none;
+    background: #efefef;
+    border-radius: 4px;
+}
+
+.form_section{margin-top: 40px;
+ border-bottom: 2px solid #dfdfdf;
+ padding-bottom: 20px;
+}
+
+.form_section h3{
+    font-size: 0.7rem;
+    margin-bottom: 15px;
+}

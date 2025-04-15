@@ -11,15 +11,10 @@ const MarketPlace: FC<MarketPlaceProps> = ({ }) => {
      <Page>
         <Input placeholder="Search Agents (eg: Booking agents, Trading agents, etc..)"/>
         <section className={styles.agents_container}>
-           <AgentBox/>
-           <AgentBox/>
-           <AgentBox/>
-           <AgentBox/>
-           <AgentBox/>
-           <AgentBox/>
-           <AgentBox/>
-           <AgentBox/>
-           <AgentBox/>
+           <AgentBox allowBorder={true}/>
+           <AgentBox allowBorder={true}/>
+           <AgentBox allowBorder={true}/>
+           <AgentBox allowBorder={true}/>
         </section>
      </Page>
   );

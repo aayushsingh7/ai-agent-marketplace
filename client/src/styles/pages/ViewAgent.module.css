@@ -1,0 +1,147 @@
+.section_container {
+  width: 100%;
+  display: flex;
+  margin-top: 40px;
+}
+
+.section_one,
+.section_two,
+.section_three {
+  width: 70%;
+  /* background: blue; */
+  padding: 20px;
+  /* height: 80dvh; */
+}
+
+.section_two{
+  padding:0px 20px;
+}
+
+.section_four {
+  width: 30%;
+  /* background: pink; */
+  /* height: 80dvh; */
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.58rem;
+  margin-top: 20px;
+}
+thead{
+    background-color: #efefef;
+}
+
+th,
+td{
+  border: 1px solid #d1d1d1;
+  text-align: left;
+  padding: 8px;
+  min-width: 200px;
+}
+
+tr:nth-child(even) {
+  background-color: #efefef;
+}
+
+.more_details{
+    border-top: 2px solid #efefef;
+    margin-top: 40px;
+   padding-top: 20px;
+}
+
+.more_details h4{
+    font-size: 0.6rem;
+    /* color: #b30000; */
+    color: #000;
+}
+
+.blockchain_info{
+    margin-top: 40px;
+}
+
+.section_four h4{
+  font-size: 0.7rem;
+  padding: 10px;
+}
+
+.section_four_header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.code_highlighter{
+  margin-top: 20px;
+}
+
+.code_highlighter h4{
+  font-size: 0.57rem;
+  padding: 10px 0px;
+}
+
+.credits_info{
+  font-size: 0.66em;
+  color: #555555;
+  margin: 20px 0px;
+}
+
+.credits_options{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 20px;
+  column-gap: 20px;
+}
+.credit_box{
+  transition: 0.3s ease-in-out;
+  background: #efefef;
+  border-radius: 5px;
+  width: 100%;
+  padding: 18px;
+  cursor: pointer;
+  border: 2px solid #efefef;
+}
+
+.credit_box h5{
+  font-size: 0.6rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: #666666;
+}
+
+.credit_box span{
+  font-size: 1.5rem;
+}
+
+.blocks p{
+  padding: 5px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.6rem;
+}
+
+.blocks{
+  padding:10px;
+  border-bottom: 2px solid #dfdfdf;
+}
+
+.payment_box{
+  padding: 14px 20px 20px 20px;
+  background: #ebebff;
+  border-radius: 10px;
+}
+
+.payment h4{
+  font-size:0.9rem;
+  margin-bottom: 20px;
+}
+
+.credit_box:hover{
+  box-shadow: #b300009c 0px 3px 8px;
+  border: 2px solid #b30000;
+}

@@ -13,6 +13,10 @@
   font-size: 25px;
 }
 
+body::-webkit-scrollbar{
+width: 0px;
+}
+
 .input{
   padding: 15px 15px;
   border-radius: 10px;
@@ -29,4 +33,44 @@
 a{
   text-decoration: none;
   color:#000000;
+}
+
+.drop_down{
+  position: relative;
+min-width: 150px;
+cursor: pointer;
+box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+border-radius: 5px;
+}
+
+.drop_down_main_content{
+  padding: 8px 10px;
+  width: 100%;
+  font-size: 0.7rem;
+  display: inline-flex;
+  border-bottom: 2px solid #d1d1d1;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drop_down_option{
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+left: 0%;
+background: #ffffff;
+width: 100%;
+box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+
+.drop_down_option span{
+  padding: 10px;
+  font-size: 0.7rem;
+  display: inline-block;
+  cursor: pointer;
+  border-bottom: 1px solid #d1d1d1;
+}
+
+.drop_down_option span:hover{
+  background: #d1d1d1;
 }
