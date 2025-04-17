@@ -4,9 +4,15 @@
 
 .form{
     margin-top: 20px;
+}
+
+.sixty{
     width: 60%;
 }
 
+.full{
+    width: 100%;
+}
 
 .input_field{
     margin-top: 5px;
@@ -28,6 +34,8 @@
     border-radius: 4px;
 }
 
+
+
 .form_section{margin-top: 40px;
  border-bottom: 2px solid #dfdfdf;
  padding-bottom: 20px;
@@ -36,4 +44,28 @@
 .form_section h3{
     font-size: 0.7rem;
     margin-bottom: 15px;
+}
+
+.markdown_container{
+    width: 100%;
+    height:calc(100dvh - 280px);
+    display: flex;
+}
+
+.markdown_container textarea{
+    font-size: 0.6rem;
+    resize: none;
+    padding: 20px;
+    outline: none;
+    width: 50%;
+    background: #efefef;
+    border: none;
+    border-radius: 10px;
+}
+
+
+.preview{
+    height: 100%;
+    width: 50%;
+    overflow-y: scroll;
 }

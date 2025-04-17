@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Linear+A&display=swap");
 
-
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -9,15 +8,15 @@
   /* background: #ffffff; */
 }
 
-:root{
+:root {
   font-size: 25px;
 }
 
-body::-webkit-scrollbar{
-width: 0px;
+body::-webkit-scrollbar {
+  width: 0px;
 }
 
-.input{
+.input {
   padding: 15px 15px;
   border-radius: 10px;
   border: 3px solid #efefef;
@@ -26,51 +25,102 @@ width: 0px;
   font-size: 0.65rem;
 }
 
-.flex-page{
+.flex-page {
   display: flex;
 }
 
-a{
+a {
   text-decoration: none;
-  color:#000000;
+  color: #000000;
 }
 
-.drop_down{
+.drop_down {
   position: relative;
-min-width: 150px;
-cursor: pointer;
-box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
-border-radius: 5px;
+  min-width: 150px;
+  cursor: pointer;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  border-radius: 5px;
 }
 
-.drop_down_main_content{
+.drop_down_main_content {
   padding: 8px 10px;
   width: 100%;
   font-size: 0.7rem;
-  display: inline-flex;
+  display: inline-flex !important;
   border-bottom: 2px solid #d1d1d1;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 0px !important;
 }
 
-.drop_down_option{
+.drop_down_option {
   display: flex;
   flex-direction: column;
   position: absolute;
-left: 0%;
-background: #ffffff;
-width: 100%;
-box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+  left: 0%;
+  background: #ffffff;
+  width: 100%;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
-.drop_down_option span{
+.drop_down_option span {
   padding: 10px;
   font-size: 0.7rem;
   display: inline-block;
   cursor: pointer;
   border-bottom: 1px solid #d1d1d1;
+  margin-bottom: 0px !important;
 }
 
-.drop_down_option span:hover{
+.drop_down_option span:hover {
   background: #d1d1d1;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checked .checkbox {
+  background: #b30000;
+  border: 2px solid #b30000;
+}
+
+.checked .checkbox svg {
+  display: block;
+  color: #ffffff;
+}
+
+.unchecked .checkbox svg {
+  display: none;
+}
+
+.unchecked .checkbox {
+  background: #efefef;
+  border: 2px solid #dfdfdf;
+}
+
+.checkbox_container {
+  margin-top: 20px;
+  display: flex;
+  font-weight: 600;
+  color: #666666;
+  align-items: flex-start;
+  font-size: 0.56rem;
+  cursor: pointer;
+}
+
+.checkbox_text p{
+    font-size: 0.5rem;
+    margin-top: 2px;
+    color: #969696;
+    font-weight: 600;
+
 }

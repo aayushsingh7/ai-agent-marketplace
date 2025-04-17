@@ -26,7 +26,7 @@ const SideNav: FC<SideNavProps> = ({type, setTab, selectedTab}) => {
               </ul> : 
               <ul>
               <li style={{ background: selectedRoute == "/marketplace" ? "#efefef" : "#ffffff" }} ><Link to="/marketplace">Market Place</Link></li>
-              <li style={{ background: selectedRoute == "/subscriptions" ? "#efefef" : "#ffffff" }}><Link to="/subscriptions">Subscriptions</Link></li>
+              <li style={{ background: selectedRoute.startsWith("/subscriptions") ? "#efefef" : "#ffffff" }}><Link to="/subscriptions">Subscriptions</Link></li>
               <li style={{ background: selectedRoute == "/upload" ? "#efefef" : "#ffffff" }}><Link to="/upload">Upload Agent</Link></li>
               <li style={{ background: selectedRoute == "/settings" ? "#efefef" : "#ffffff" }}><Link to="/settings">Setting</Link></li>
           </ul>

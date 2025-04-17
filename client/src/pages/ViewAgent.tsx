@@ -129,7 +129,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         <div className={styles.section_container}>
           {selectedSection == 1 ? (
             <section className={styles.section_one}>
-              <AgentBox allowBorder={false} />
+              <AgentBox type="normal" allowBorder={false} />
 
               <div className={styles.more_details}>
                 <div className={styles.agent_info}>
