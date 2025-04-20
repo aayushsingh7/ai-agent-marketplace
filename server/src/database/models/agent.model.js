@@ -18,6 +18,8 @@ const agentSchema = new Schema(
     tags: [{ type: String }],
     status: { type: Number, enum: [0, 1] },
     usageLicense: { type: String },
+    isForSale:{type:Boolean,default:false},
+    salePrice:{type:Number,default:0},
     blockchainDetails: [
       { blockchain: { type: String, enum: ["Sei Network"] } },
       { transactionHash: { type: String } },

@@ -6,7 +6,7 @@ interface PageProps {
 
 const Page: FC<PageProps> = ({children,...props}) => {
   return (
-    <div style={{padding:"26px 20px",width:"100%"}} {...props}>
+    <div style={{padding:"26px 20px",width:"100%"}} {...props} className="page">
       {children}
     </div>
   );

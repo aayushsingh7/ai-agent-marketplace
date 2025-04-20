@@ -1,4 +1,4 @@
-# 🤖 Decentralized AI Bot Marketplace on Sei
+<!-- # 🤖 Decentralized AI Bot Marketplace on Sei
 
 ## 🔍 Problem
 
@@ -64,17 +64,106 @@ Sei is the **fastest Layer 1 blockchain**, optimized for trading and high-throug
 - 💎 **Data On-Chain**: Real-world usage data brings analytics and insights into the ecosystem.
 - 🤝 **Composable AI Agents**: Encourages interoperable bot design across dApps.
 
----
+--- -->
 
-## 🚧 Tech Stack (For Hackathon)
 
-- 🧠 AI Bots (Mocked with OpenAI or local models)
-- ⚙️ Smart Contracts (Rust or CosmWasm on Sei)
-- 🌐 Frontend: Next.js or Vite + Tailwind
-- 📦 Wallet Integration: Leap / Keplr
-- 📈 Optional: NFT Minting for bot licenses
+# 🤖 Decentralized AI Bot Rental Platform on Sei  
+### Empowering AI creators & users through crypto-native access
 
 ---
+
+## 🔍 The Problem  
+
+AI is transforming industries, but today’s access model is broken:
+
+- 🏦 Centralized platforms dominate AI access and monetization.
+- 💡 Independent developers have limited options to earn from their AI agents.
+- 🔒 There’s no **transparent**, **decentralized**, or **crypto-native** way for users to discover and rent AI tools.
+
+---
+
+## 💡 The Solution: Rent AI Agents via $SEI — No Smart Contracts Needed  
+
+Introducing a **decentralized AI bot rental marketplace** built on the **Sei blockchain**.
+
+- 🧠 Developers list their AI agents for rent.
+- 💸 Users send $SEI directly to developers to unlock access.
+- 🔓 Off-chain verification grants access without needing smart contracts.
+
+> ⚡ Simple. Fast. Crypto-native.
+
+---
+
+## ⚙️ MVP Features  
+
+- 🛍 **AI Bot Marketplace**: Discover chatbots, automation tools, content generators, and more.  
+- 💰 **Direct $SEI Payments**: Rent bots via peer-to-peer token transfers.  
+- 🔐 **Secure Access Granting**: Access is manually or automatically verified after payment.  
+- 🧠 **Off-Chain Execution**: Bots run off-chain (e.g., APIs or cloud services) for fast and cost-effective performance.
+
+---
+
+## 🔮 What’s Next  
+
+Future-proofing the platform with:
+
+- 📊 **On-Chain Usage Logging**: Transparently track bot interactions.
+- 🪪 **NFT-Based Licensing**: Turn bots into tradable digital assets.
+- ⛓️ **Smart Contract Add-ons**: Enable subscriptions and microtransactions.
+- 🌟 **Reputation System**: Let users review and rate bots.
+- 🧾 **Royalty Engine**: Reward developers for downstream usage or resale.
+
+---
+
+## 🌍 Ecosystem Impact  
+
+| Stakeholder       | Value Delivered                                                                 |
+|-------------------|----------------------------------------------------------------------------------|
+| 👨‍💻 AI Developers   | Instantly monetize AI globally — no platform cuts, no gatekeepers                |
+| 🙋 Users           | Frictionless access to powerful bots using $SEI — pay, unlock, use               |
+| 🌐 Sei Blockchain  | Expands $SEI’s utility beyond DeFi: fuels AI economy, increases on-chain activity |
+
+> 🧩 Our platform turns Sei into an **AI economy layer**, not just a financial one.
+
+---
+
+## ⚡ Why Sei?  
+
+| Sei Feature           | What It Enables                                                              |
+|-----------------------|------------------------------------------------------------------------------|
+| 🚀 Parallel Execution | Handles high-volume bot rentals without congestion                           |
+| ⚡ Fast Finality       | Instant confirmation = instant access                                        |
+| 💸 Low Gas Fees        | Micro-payments are feasible — opening new monetization models for developers |
+
+---
+
+## 🛠️ Tech Stack  
+
+- **Frontend**: React + Sei wallet integration  
+- **Payments**: Direct $SEI transfers (no smart contracts needed)  
+- **Bot Hosting**: Off-chain (cloud servers, APIs, containers)  
+- **Blockchain**: Sei Layer 1  
+
+---
+
+## 🔄 How It Works (MVP Flow)  
+
+1. User browses AI bots in the marketplace.  
+2. Selects a bot and sends $SEI to the bot's wallet address.  
+3. Platform detects payment (manually or via automation).  
+4. User receives temporary access credentials (API key, token, or app link).  
+5. User interacts with the bot directly via UI or API.
+
+---
+
+## 📅 Roadmap  
+
+- ✅ Peer-to-peer $SEI payment for access  
+- 🔄 Auto access unlock via wallet verification  
+- 📊 Usage logs on-chain (coming soon)  
+- 🪪 NFT-based agent licensing & resale rights (future)  
+- ⛓️ Smart contract subscription support (future)
+
 
 ## 🚀 Getting Started
 

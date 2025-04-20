@@ -16,6 +16,33 @@ body::-webkit-scrollbar {
   width: 0px;
 }
 
+.button{
+  appearance: none;
+  border: none;
+  cursor: pointer;
+}
+
+
+.page h1{
+  font-family: "Special Gothic Expanded One", sans-serif;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.fr{
+  font-family: "Special Gothic Expanded One", sans-serif;
+  font-size: 1rem;
+  margin-bottom: 50px;
+  color: #777777;
+}
+
+.fr a{
+  font-family: "Special Gothic Expanded One", sans-serif;
+  font-size: 1rem;
+  color: #b30000;
+  text-decoration: underline;
+}
+
 .input {
   padding: 15px 15px;
   border-radius: 10px;

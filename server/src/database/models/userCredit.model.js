@@ -8,6 +8,7 @@ const userCreditsSchema = new Schema(
     creditsUsed: { type: Number, required: true },
     creditsCostPerRequest: { type: Number, required: true, default: 1 },
     accessToken: { type: String, default: null },
+    walletAddress:{type:String,required:true},
     history: [
       {
         type: { type: String, enum: ["Purchased", "Used", "Bonus", "Refunded"] },
@@ -22,6 +23,6 @@ const userCreditsSchema = new Schema(
   { timestamps: true }
 );
 
-const UserCredits = model("UserCredit", userCreditsSchema);
+const UserCredit = model("UserCredit", userCreditsSchema);
 
-export default UserCredits;
+export default UserCredit;

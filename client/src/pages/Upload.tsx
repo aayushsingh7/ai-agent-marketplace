@@ -40,7 +40,7 @@ const Upload: FC<UploadProps> = ({}) => {
 
                 <div className={styles.input_field}>
                   <span>
-                    Enter Agent Name
+                    Enter Agent Description
                     <span
                       title="Required"
                       style={{ marginLeft: "2px", color: "#b30000" }}

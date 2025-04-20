@@ -1,0 +1,195 @@
+@import url("https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&display=swap");
+
+.home_page {
+    padding: 0px 50px;
+}
+
+
+.home_page h2{
+    font-family: "Special Gothic Expanded One", sans-serif;
+    font-size: 2rem;
+    margin-bottom: 40px;
+}
+
+.home_page nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 0px;
+}
+
+.home_page nav h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  color: #b30000;
+}
+
+.home_page nav h3 span {
+  color: #000;
+}
+
+.home_page nav button {
+  font-size: 0.8rem;
+  padding: 10px 15px;
+  color: #ffffff;
+  background: #b30000;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+.hero_section {
+  width: 100%;
+  height: 80dvh;
+  /* background: pink; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero_section_texts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 70%;
+}
+
+.hero_section_texts h1 {
+  font-size: 3rem;
+  text-align: center;
+  font-weight: 900;
+  line-height: 3.5rem;
+  font-family: "Special Gothic Expanded One", sans-serif;
+  font-weight: 400;
+}
+
+.hero_section_texts h1 span {
+  color: #b30000;
+  font-family: "Special Gothic Expanded One", sans-serif;
+}
+
+.hero_section_texts button {
+  padding: 15px 20px;
+  background: #b30000;
+  font-size: 1.5rem;
+  margin-top: 40px;
+  border-radius: 10px;
+  font-family: "Special Gothic Expanded One", sans-serif;
+  color: #ffffff;
+}
+
+.how_it_works,
+.features {
+margin-top: 20px;
+border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 60px;
+}
+
+.how_it_works{
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+
+.steps{
+  width: 100%;
+  position: relative;
+  place-items: center;
+  display: grid;
+  margin-bottom: 20px;
+  row-gap: 30px;
+  column-gap: 30px;
+}
+
+
+
+.steps {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+
+.step {
+  border: 2px solid #dfdfdf;
+  /* padding: 15px; */
+  border-radius: 10px;
+  /* margin-bottom: 30px; */
+  /* width: 400px; */
+}
+
+.step h3 {
+  color: var(--primary-color);
+  padding: 10px;
+  font-size: 0.7rem;
+  border-bottom: 2px solid #dfdfdf;
+  background: #dfdfdf;
+}
+
+.step p {
+  font-size: 0.7rem;
+  padding: 10px;
+  line-height: 1.2rem;
+}
+
+.steps .step_span {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #b30000;
+  color: #ffffff;
+}
+
+.steps .line {
+  position: absolute;
+  height: 5px;
+  background: #b30000;
+  top: 50%;
+  width: 77%;
+}
+
+.features_grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 20px;
+    column-gap: 20px
+}
+
+.features_grid figure{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    /* box-shadow: rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset; */
+    border: 3px solid #dfdfdf;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.features_grid figure svg{
+    font-size: 60px;
+    color: #b30000;
+    margin-bottom: 20px;
+    /* padding: 40px; */
+}
+
+.features_grid h3 {
+    text-align: center;
+    color: var(--primary-color);
+    padding: 10px;
+    font-size: 0.7rem;
+  }
+  
+  .features_grid p {
+    font-size: 0.7rem;
+    padding: 10px;
+    text-align: center;
+    /* line-height: 1em; */
+  }
+  

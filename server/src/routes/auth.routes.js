@@ -1,9 +1,9 @@
 import { Router } from "express";
 import AuthController from "../controllers/auth.controller.js";
 const authRoutes = Router();
-const authController = new AuthController()
+const authController = new AuthController();
 
-
-authRoutes.get("/validate-hx-token", authController.validTransaction)
+authRoutes.get("/nonce", authController.generateNonce);
+authRoutes.get("/verify-signature", authController.verifySignature);
 
 export default authRoutes;

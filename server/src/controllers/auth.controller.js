@@ -1,21 +1,35 @@
 import AuthService from "../services/auth.service.js";
 
 class AuthController {
-    constructor() {
-        this.authService = new AuthService();
-        this.validTransaction = this.validTransaction.bind(this);
-    }
+  constructor() {
+    this.authService = new AuthService();
+    this.generateNonce = this.generateNonce.bind(this);
+    this.verifySignature = this.verifySignature.bind(this);
+  }
 
-    async validTransaction (req,res){
-     const {txHash} = req.query;
-     try {
-        let data = await this.authService.validTransaction(txHash)
-        res.status(200).send({success:true,data})
-     } catch (err) {
-        console.log(err)
-        res.status(err.statusCode).send({success:false,message:err.message})
-     }
+  async generateNonce(req, res) {
+    try {
+      const nonce = await this.authService.generateNonce(req.query);
+      res.status(200).send({
+        success: true,
+        message: "Nonce generated successfully",
+        data: nonce,
+      });
+    } catch (err) {
+      res.status(err.statusCode).send({ success: false, message: err.message });
     }
+  }
+
+  async verifySignature(req, res) {
+    try {
+      const result = await this.verifySignature(req.query);
+      res
+        .status(200)
+        .send({ success: true, message: "Verified Signature", data: result });
+    } catch (err) {
+      res.status(err.statusCode).send({ success: false, message: err.message });
+    }
+  }
 }
 
 export default AuthController;

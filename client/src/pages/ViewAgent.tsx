@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Page from "../components/Page";
 import styles from "../styles/pages/ViewAgent.module.css";
 import Input from "../components/ui/Input";
@@ -9,11 +9,15 @@ import DropDown from "../components/ui/DropDown";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import Button from "../components/ui/Button";
+import { useLocation, useParams } from "react-router-dom";
+
 
 interface ViewAgentProps {}
 
 const ViewAgent: FC<ViewAgentProps> = ({}) => {
   const [selectedSection, setSelectedSection] = useState<number>(1);
+  const [agentDetails,setAgentDetails] = useState<any>()
+  const params = useParams();
   const [selectedLanguage, setSelectedLanguage] =
     useState<string>("Javascript");
   const [fetchMethod, setFetchMethod] = useState<string>("Fetch");
@@ -117,6 +121,21 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
   }
 }
 `;
+
+  useEffect(() => {
+    fetchAgentDetails(params.agentID || "")
+  }, []);
+
+  const fetchAgentDetails = async(agentID:string)=> {
+   try { 
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/agents/agent?agentID=${agentID}`)
+      const data = await response.json();
+      setAgentDetails(data.data)
+   } catch (err) {
+    console.log(err)
+   }
+  }
+
   return (
     <div className="flex-page">
       <SideNav
@@ -129,7 +148,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         <div className={styles.section_container}>
           {selectedSection == 1 ? (
             <section className={styles.section_one}>
-              <AgentBox type="normal" allowBorder={false} />
+              <AgentBox data={{}} type="normal" allowBorder={false} />
 
               <div className={styles.more_details}>
                 <div className={styles.agent_info}>

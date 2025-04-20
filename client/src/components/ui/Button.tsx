@@ -10,7 +10,7 @@ const Button: FC<ButtonProps> = ({
 }) => {
 
   return (
-    <button 
+    <button  className="button"
       {...props}
     >
       {children}

@@ -7,7 +7,7 @@
 
 //   const connectWallet = async () => {
 //     const chainId = "atlantic-2"; // Sei Testnet Chain ID
-  
+
 //     try {
 //       // Check if Compass wallet is installed
 //       //@ts-ignore
@@ -15,50 +15,47 @@
 //         alert("Compass wallet extension not found. Please install it first.");
 //         return;
 //       }
-  
+
 //       // Enable the Sei chain in Compass
 //       //@ts-ignore
 //       await window.compass.enable(chainId);
-      
+
 //       // Get the offline signer for signing transactions
 //       //@ts-ignore
 //       const offlineSigner = window.compass.getOfflineSigner(chainId);
 //       const accounts = await offlineSigner.getAccounts();
 //       const address = accounts[0].address;
 //       setWalletAddress(address);
-  
+
 //       // 1. Get nonce from backend
 //       const res = await fetch(`http://localhost:5000/auth/nonce?address=${address}`);
 //       const { nonce } = await res.json();
-  
+
 //       // 2. Sign the nonce with Compass wallet
 //       //@ts-ignore
 //       const signed = await window.compass.signArbitrary(chainId, address, nonce);
-  
+
 //       console.log({address, nonce, signature: signed.signature})
-  
+
 //       // 3. Send signature to backend for verification
 //       // const verifyRes = await fetch(`http://localhost:5000/auth/verify`, {
 //       //   method: "POST",
 //       //   headers: { "Content-Type": "application/json" },
 //       //   body: JSON.stringify({ address, nonce, signature: signed.signature }),
 //       // });
-  
+
 //       // const data = await verifyRes.json();
 //       // if (data.success) {
 //       //   alert("✅ Login successful!");
 //       // } else {
 //       //   alert("❌ Verification failed.");
 //       // }
-  
+
 //     } catch (err) {
 //       console.error("Error connecting wallet:", err);
 //       alert("Failed to connect wallet. Please check if Compass is installed and try again.");
 //     }
 //   };
-
-
-
 
 //   return (
 //     <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -70,12 +67,13 @@
 //   );
 // }
 
-
 // Give credits to user. Tx Hash: DA06731845381556B9A18130E65BBF5CA54F9CC161605A142610E3897B600510
-
 
 import React, { useState } from "react";
 import { SigningStargateClient } from "@cosmjs/stargate";
+import Page from "../components/Page";
+import Button from "../components/ui/Button";
+import { Link } from "react-router-dom";
 
 const SeiSender = () => {
   const [walletAddress, setWalletAddress] = useState("");
@@ -162,11 +160,38 @@ const SeiSender = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <button onClick={connectWallet}>🔌 Connect Wallet</button>
-      <br /><br />
-      <button onClick={handleSend}>💸 Send SEI</button>
-    </div>
+    <Page>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          height: "90dvh",
+        }}
+      >
+        <h1>Please Connect Your Wallet</h1>
+        <p className="fr">Currently we only support <Link to={"https://chromewebstore.google.com/detail/compass-wallet-for-sei/anokgmphncpekkhclmingpimjmcooifb?hl=en"}>Cosmos</Link> wallet.</p>
+        <Button
+          onClick={()=> connectWallet()}
+          style={{
+            padding: "15px",
+            fontSize: "1rem",
+            color: "#ffffff",
+            background: "#b30000",
+            borderRadius: "10px",
+            fontFamily: "Special Gothic Expanded One, sans-serif",
+          }}
+        >
+          Connect Wallet
+        </Button>
+      </div>
+    </Page>
+    // <div style={{ padding: "20px",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column" }}>
+    //   <h1></h1>
+    //   <button onClick={connectWallet} >🔌 Connect Wallet</button>
+    //   {/* <button onClick={handleSend}>💸 Send SEI</button> */}
+    // </div>
   );
 };
 
