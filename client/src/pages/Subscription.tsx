@@ -11,12 +11,10 @@ const Subscription: FC<SubscriptionProps> = ({}) => {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
 
   const fetchSubscriptions = async () => {
+    console.log("HELLO MOTHERUCKER")
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/user/subscriptions?userID=${
-          loggedInUser._id
-        }`
-      );
+        `${import.meta.env.VITE_API_URL}/users/${loggedInUser._id}/subscriptions`);
       const data = await response.json();
       setSubscriptions(data.data);
     } catch (err) {

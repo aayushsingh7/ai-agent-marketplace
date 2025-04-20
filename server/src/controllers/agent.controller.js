@@ -1,14 +1,26 @@
+import Agent from "../database/models/agent.model.js";
 import AgentService from "../services/agent.service.js";
 
 class AgentController {
   constructor() {
     this.agentService = new AgentService();
+    this.agent = Agent;
     this.searchAgents = this.searchAgents.bind(this);
     this.useAgentAPI = this.useAgentAPI.bind(this);
     this.createAgent = this.createAgent.bind(this);
     this.getAgent = this.getAgent.bind(this);
+    this.getAgents = this.getAgents.bind(this);
   }
 
+  async getAgents (req,res) {
+    try {
+      const results = await this.agent.find();
+      res.status(200).send({success:true,message:"Agents fetched successfully", data:results})
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({success:false,message:"Oops! something went wrong"})
+    }
+  }
   async searchAgents(req, res) {
     try {
       const { query } = req.query;
@@ -42,7 +54,7 @@ class AgentController {
 
   async getAgent(req, res) {
     try {
-      const { agentID } = req.query;
+      const { agentID } = req.params;
       const agent = await this.agentService.getAgent(agentID);
       res.status(200).send({
         success: true,

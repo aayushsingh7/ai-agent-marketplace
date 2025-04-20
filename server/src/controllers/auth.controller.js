@@ -16,18 +16,20 @@ class AuthController {
         data: nonce,
       });
     } catch (err) {
-      res.status(err.statusCode).send({ success: false, message: err.message });
+      res.status(err.statusCode || 500).send({ success: false, message: err.message });
     }
   }
 
   async verifySignature(req, res) {
+    console.log("-------------------------------- ", req, " ----------------------------------------")
     try {
-      const result = await this.verifySignature(req.query);
+      const result = await this.authService.verifySignature(req.query);
       res
         .status(200)
-        .send({ success: true, message: "Verified Signature", data: result });
+        .send({ success: true, message: "Verified Signature", token: result.token });
     } catch (err) {
-      res.status(err.statusCode).send({ success: false, message: err.message });
+      console.log(err)
+      res.status(err.statusCode || 500).send({ success: false, message: err.message });
     }
   }
 }

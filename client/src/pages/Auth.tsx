@@ -1,161 +1,392 @@
-// // Auth.js
-// import { useState } from "react";
-// import { SigningStargateClient } from "@cosmjs/stargate";
+// import React, { useState, useEffect } from "react";
+// import { Link, useNavigate } from "react-router-dom";
+// import Page from "../components/Page"; // Assuming this is your page wrapper component
+// import Button from "../components/ui/Button"; // Assuming this is your button component
 
-// export default function Auth() {
+// const API_URL = import.meta.env.VITE_API_URL;
+
+// const Auth = () => {
 //   const [walletAddress, setWalletAddress] = useState("");
+//   const [isConnecting, setIsConnecting] = useState(false);
+//   const [error, setError] = useState("");
+//   const [networkName, setNetworkName] = useState("");
+//   const navigate = useNavigate();
 
+//   useEffect(() => {
+//     // Check if user is already logged in
+//     const token = localStorage.getItem("authToken");
+//     if (token) {
+//       navigate("/dashboard"); // Redirect to dashboard if already logged in
+//     }
+
+//     // Check if MetaMask is installed
+//     // @ts-ignore
+//     if (!window.ethereum) {
+//       setError(
+//         "MetaMask is not installed. Please install MetaMask to continue."
+//       );
+//     }
+//   }, [navigate]);
+
+//   // Add SEI EVM network to MetaMask
+//   const addSeiEvmNetwork = async () => {
+//     try {
+//       // @ts-ignore
+//       await window.ethereum.request({
+//         method: "wallet_addEthereumChain",
+//         params: [
+//           {
+//             chainId: "0x530", // 1328 in decimal (SEI EVM Testnet)
+//             chainName: "Sei",
+//             nativeCurrency: {
+//               name: "SEI",
+//               symbol: "SEI",
+//               decimals: 18,
+//             },
+//             rpcUrls: ["https://evm-rpc-testnet.sei-apis.com"],
+//             // blockExplorerUrls: [] // Add if you have a valid testnet explorer URL
+//           },
+//         ],
+//       });
+
+//       return true;
+//     } catch (error) {
+//       console.error("Error adding SEI EVM network:", error);
+//       throw error;
+//     }
+//   };
+
+//   // Switch to SEI EVM network
+//   const switchToSeiEvm = async () => {
+//     try {
+//       // @ts-ignore
+//       await window.ethereum.request({
+//         method: "wallet_switchEthereumChain",
+//         params: [{ chainId: "0x2BCA" }], // 11210 in hex for SEI EVM Testnet
+//       });
+//       return true;
+//     } catch (err: any) {
+//       // This error code indicates that the chain has not been added to MetaMask
+//       if (err.code === 4902) {
+//         return addSeiEvmNetwork();
+//       }
+//       console.error("Error switching network:", error);
+//       throw error;
+//     }
+//   };
+
+//   // Connect wallet
 //   const connectWallet = async () => {
-//     const chainId = "atlantic-2"; // Sei Testnet Chain ID
+//     setIsConnecting(true);
+//     setError("");
 
 //     try {
-//       // Check if Compass wallet is installed
-//       //@ts-ignore
-//       if (!window.compass) {
-//         alert("Compass wallet extension not found. Please install it first.");
-//         return;
+//       // Try to switch to SEI EVM network first
+//       await switchToSeiEvm();
+
+//       // Request account access
+//       // @ts-ignore
+//       const accounts = await window.ethereum.request({
+//         method: "eth_requestAccounts",
+//       });
+
+//       const address = accounts[0];
+//       setWalletAddress(address);
+//       setNetworkName("SEI EVM Testnet");
+
+//       // Once connected, automatically proceed with login
+//       await handleLogin(address);
+//     } catch (err: any) {
+//       console.log(err)
+//       setError(err.message || "Failed to connect wallet");
+//       setIsConnecting(false);
+//     }
+//   };
+
+//   // Sign message and login
+//   const handleLogin = async (address: string) => {
+//     try {
+//       // Step 1: Get nonce from server
+//       const nonceResponse = await fetch(
+//         `${API_URL}/auth/nonce?walletAddress=${address}`
+//       );
+
+//       if (!nonceResponse.ok) {
+//         throw new Error("Failed to get nonce from server");
 //       }
 
-//       // Enable the Sei chain in Compass
-//       //@ts-ignore
-//       await window.compass.enable(chainId);
+//       const { nonce, message } = await nonceResponse.json();
 
-//       // Get the offline signer for signing transactions
-//       //@ts-ignore
-//       const offlineSigner = window.compass.getOfflineSigner(chainId);
-//       const accounts = await offlineSigner.getAccounts();
-//       const address = accounts[0].address;
-//       setWalletAddress(address);
+//       // Step 2: Sign the message with MetaMask
+//       const msg = `Sign this message to verify your identity. Nonce: ${nonce}`;
+//       // @ts-ignore
+//       const signature = await window.ethereum.request({
+//         method: "personal_sign",
+//         params: [msg, address],
+//       });
 
-//       // 1. Get nonce from backend
-//       const res = await fetch(`http://localhost:5000/auth/nonce?address=${address}`);
-//       const { nonce } = await res.json();
+//       // Step 3: Verify the signature with the server
+//       const verifyResponse = await fetch(
+//         `${API_URL}/auth/verify-signature?walletAddress=${address}&signature=${signature}`
+//       );
 
-//       // 2. Sign the nonce with Compass wallet
-//       //@ts-ignore
-//       const signed = await window.compass.signArbitrary(chainId, address, nonce);
+//       if (!verifyResponse.ok) {
+//         throw new Error("Failed to verify signature");
+//       }
 
-//       console.log({address, nonce, signature: signed.signature})
+//       const authData = await verifyResponse.json();
 
-//       // 3. Send signature to backend for verification
-//       // const verifyRes = await fetch(`http://localhost:5000/auth/verify`, {
-//       //   method: "POST",
-//       //   headers: { "Content-Type": "application/json" },
-//       //   body: JSON.stringify({ address, nonce, signature: signed.signature }),
-//       // });
-
-//       // const data = await verifyRes.json();
-//       // if (data.success) {
-//       //   alert("✅ Login successful!");
-//       // } else {
-//       //   alert("❌ Verification failed.");
-//       // }
-
-//     } catch (err) {
-//       console.error("Error connecting wallet:", err);
-//       alert("Failed to connect wallet. Please check if Compass is installed and try again.");
+//       // Step 4: Save token and redirect
+//       if (authData.token) {
+//         localStorage.setItem("authToken", authData.token);
+//         navigate("/dashboard");
+//       } else {
+//         throw new Error("No authentication token received");
+//       }
+//     } catch (err: any) {
+//       setError(err.message || "Login failed");
+//       setIsConnecting(false);
 //     }
 //   };
 
 //   return (
-//     <div style={{ textAlign: "center", marginTop: "50px" }}>
-//       <h2>Connect Wallet to Continue</h2>
-//       <button onClick={connectWallet}>Connect Compass Wallet</button>
-//       {walletAddress && <p>Connected Wallet: {walletAddress}</p>}
-//       <button onClick={handleSend}>Send Fund</button>
-//     </div>
+//     <Page>
+//       <div
+//         style={{
+//           display: "flex",
+//           alignItems: "center",
+//           justifyContent: "center",
+//           flexDirection: "column",
+//           height: "90dvh",
+//         }}
+//       >
+//         <h1>Please Connect Your Wallet</h1>
+//         <p className="fr">
+//           We now support{" "}
+//           <a
+//             href="https://metamask.io/download/"
+//             target="_blank"
+//             rel="noopener noreferrer"
+//           >
+//             MetaMask
+//           </a>{" "}
+//           wallet on SEI EVM Testnet.
+//         </p>
+
+//         {error && <p style={{ color: "red" }}>{error}</p>}
+
+//         {walletAddress ? (
+//           <div>
+//             <p>
+//               Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+//             </p>
+//             <p>Network: {networkName}</p>
+//           </div>
+//         ) : (
+//           <Button
+//             onClick={connectWallet}
+//             disabled={isConnecting}
+//             style={{
+//               padding: "15px",
+//               fontSize: "1rem",
+//               color: "#ffffff",
+//               background: "#b30000",
+//               borderRadius: "10px",
+//               fontFamily: "Special Gothic Expanded One, sans-serif",
+//             }}
+//           >
+//             {isConnecting ? "Connecting..." : "Connect MetaMask"}
+//           </Button>
+//         )}
+//       </div>
+//     </Page>
 //   );
-// }
+// };
 
-// Give credits to user. Tx Hash: DA06731845381556B9A18130E65BBF5CA54F9CC161605A142610E3897B600510
+// export default Auth;
 
-import React, { useState } from "react";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Page from "../components/Page";
 import Button from "../components/ui/Button";
-import { Link } from "react-router-dom";
 
-const SeiSender = () => {
+const API_URL = import.meta.env.VITE_API_URL;
+
+const Auth = () => {
   const [walletAddress, setWalletAddress] = useState("");
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState("");
+  const [networkName, setNetworkName] = useState("");
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    // Check if user is already logged in
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      navigate("/dashboard");
+    }
+
+    // Check if MetaMask is installed
+    // @ts-ignore
+    if (typeof window.ethereum === 'undefined') {
+      setError("MetaMask is not installed. Please install MetaMask to continue.");
+    }
+  }, [navigate]);
+
+  // Add SEI EVM network to MetaMask
+  const addSeiEvmNetwork = async () => {
+    // @ts-ignore
+    if (typeof window.ethereum === 'undefined') {
+      throw new Error("MetaMask is not installed");
+    }
+
+    try {
+      // @ts-ignore
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          {
+            chainId: '0x530', // 1328 in decimal (SEI EVM Testnet)
+            chainName: 'Sei',
+            nativeCurrency: {
+              name: 'SEI',
+              symbol: 'SEI',
+              decimals: 18
+            },
+            rpcUrls: ['https://evm-rpc-testnet.sei-apis.com'],
+            // blockExplorerUrls: [] // Add if you have a valid testnet explorer URL
+          }
+        ]
+      });
+      
+      console.log("Successfully added SEI EVM network");
+      return true;
+    } catch (err:any) {
+      console.error('Error adding SEI EVM network:', err);
+      throw err;
+    }
+  };
+
+  // Switch to SEI EVM network
+  const switchToSeiEvm = async () => {
+    // @ts-ignore
+    if (typeof window.ethereum === 'undefined') {
+      throw new Error("MetaMask is not installed");
+    }
+
+    try {
+      // @ts-ignore
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x2BCA' }] // 11210 in hex for SEI EVM Testnet
+      });
+      console.log("Successfully switched to SEI EVM network");
+      return true;
+    } catch (err:any) {
+      console.error('Error switching network:', err);
+      
+      // This error code indicates that the chain has not been added to MetaMask
+      if (err.code === 4902) {
+        console.log("Network not found. Adding network...");
+        return addSeiEvmNetwork();
+      }
+      throw err;
+    }
+  };
+
+  // Connect wallet - simplified version to identify the error
   const connectWallet = async () => {
-    const chainId = "atlantic-2";
-
-    //@ts-ignore
-    if (!window.compass) {
-      alert("Compass wallet extension not found.");
-      return;
-    }
-
+    setIsConnecting(true);
+    setError("");
+    
     try {
-      //@ts-ignore
-      await window.compass.enable(chainId);
-      //@ts-ignore
-      const offlineSigner = window.compass.getOfflineSigner(chainId);
-      const accounts = await offlineSigner.getAccounts();
-      setWalletAddress(accounts[0].address);
-      alert(`✅ Connected: ${accounts[0].address}`);
-    } catch (err) {
-      console.error("Connection error:", err);
-      alert("Failed to connect wallet");
+      console.log("Starting wallet connection...");
+      
+      // First, just try to get accounts without network switching
+      // @ts-ignore
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      });
+      
+      console.log("Connected accounts:", accounts);
+      const address = accounts[0];
+      setWalletAddress(address);
+      
+      // Once we have the address, we can try to switch networks
+      try {
+        await switchToSeiEvm();
+        setNetworkName("SEI EVM Testnet");
+      } catch (networkErr) {
+        console.error("Network switching failed but we can continue:", networkErr);
+        // Continue with login even if network switching failed
+      }
+      
+      // Proceed with login
+      await handleLogin(address);
+    } catch (err:any) {
+      console.error("Wallet connection error:", err);
+      setError(`Connection failed: ${err.message || JSON.stringify(err)}`);
+      setIsConnecting(false);
     }
   };
 
-  const sendSeiTokens = async (
-    fromAddress: string,
-    toAddress: string,
-    amountSei: number
-  ) => {
-    const rpcUrl = "https://rpc.atlantic-2.seinetwork.io"; // Stargate RPC
-    const chainId = "atlantic-2";
-
-    //@ts-ignore
-    const offlineSigner = window.compass.getOfflineSigner(chainId);
-    const client = await SigningStargateClient.connectWithSigner(
-      rpcUrl,
-      offlineSigner
-    );
-
-    const amountInMicro = (amountSei * 1_000_000).toString();
-
-    const fee = {
-      amount: [{ denom: "usei", amount: "5000" }],
-      gas: "200000",
-    };
-
-    const result = await client.sendTokens(
-      fromAddress,
-      toAddress,
-      [{ denom: "usei", amount: amountInMicro }],
-      fee,
-      "Sent from my dApp"
-    );
-
-    return result.transactionHash;
-  };
-
-  const handleSend = async () => {
-    if (!walletAddress) return alert("Wallet not connected");
-
-    const recipient = prompt("Enter recipient wallet address:");
-    const amount = prompt("Enter amount in SEI:");
-
-    if (!recipient || !amount) return;
-
+  // Sign message and login
+  const handleLogin = async (address:string) => {
     try {
-      const txHash = await sendSeiTokens(
-        walletAddress,
-        recipient,
-        parseFloat(amount)
+      console.log("Starting login process for address:", address);
+      
+      // Step 1: Get nonce from server
+      console.log(`Fetching nonce from ${API_URL}/auth/nonce?walletAddress=${address}`);
+      const nonceResponse = await fetch(`${API_URL}/auth/nonce?walletAddress=${address}`);
+      
+      if (!nonceResponse.ok) {
+        const errorText = await nonceResponse.text();
+        throw new Error(`Failed to get nonce: ${errorText}`);
+      }
+      
+      const nonceData = await nonceResponse.json();
+      console.log("Received nonce data:", nonceData.data.nonce);
+      
+      // Create message to sign
+      const msg = `Sign this message to verify your identity. Nonce: ${nonceData.data.nonce}`;
+      console.log("Message to sign:", msg);
+      
+      // Step 2: Sign the message with MetaMask
+      console.log("Requesting signature from MetaMask...");
+      // @ts-ignore
+      const signature = await window.ethereum.request({
+        method: 'personal_sign',
+        // Make sure params array is in the correct order: [message, address]
+        params: [msg, address]
+      });
+      
+      console.log("Obtained signature:", signature);
+      
+      // Step 3: Verify the signature with the server
+      console.log(`Verifying signature at ${API_URL}/auth/verify-signature`);
+      const verifyResponse = await fetch(
+        `${API_URL}/auth/verify-signature?walletAddress=${address}&signature=${encodeURIComponent(signature)}`
       );
-
-      alert(`✅ Transaction sent! Hash: ${txHash}`);
-
-      // ✅ Send this txHash to your backend to confirm & give credits
-      console.log("Give credits to user. Tx Hash:", txHash);
-    } catch (err) {
-      console.error("❌ Transaction failed", err);
-      alert("❌ Transaction failed. See console for error.");
+      
+      if (!verifyResponse.ok) {
+        const errorText = await verifyResponse.text();
+        throw new Error(`Failed to verify signature: ${errorText}`);
+      }
+      
+      const authData = await verifyResponse.json();
+      console.log("Authentication successful:", authData);
+      
+      // Step 4: Save token and redirect
+      if (authData.token) {
+        localStorage.setItem('authToken', authData.token);
+        navigate('/dashboard');
+      } else {
+        throw new Error('No authentication token received');
+      }
+    } catch (err:any) {
+      console.error("Login error:", err);
+      setError(`Login failed: ${err.message}`);
+      setIsConnecting(false);
     }
   };
 
@@ -171,28 +402,36 @@ const SeiSender = () => {
         }}
       >
         <h1>Please Connect Your Wallet</h1>
-        <p className="fr">Currently we only support <Link to={"https://chromewebstore.google.com/detail/compass-wallet-for-sei/anokgmphncpekkhclmingpimjmcooifb?hl=en"}>Cosmos</Link> wallet.</p>
-        <Button
-          onClick={()=> connectWallet()}
-          style={{
-            padding: "15px",
-            fontSize: "1rem",
-            color: "#ffffff",
-            background: "#b30000",
-            borderRadius: "10px",
-            fontFamily: "Special Gothic Expanded One, sans-serif",
-          }}
-        >
-          Connect Wallet
-        </Button>
+        <p className="fr">
+          We now support <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer">MetaMask</a> wallet on SEI EVM Testnet.
+        </p>
+        
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        
+        {walletAddress ? (
+          <div>
+            <p>Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+            <p>Network: {networkName || "Unknown"}</p>
+          </div>
+        ) : (
+          <Button
+            onClick={connectWallet}
+            disabled={isConnecting}
+            style={{
+              padding: "15px",
+              fontSize: "1rem",
+              color: "#ffffff",
+              background: "#b30000",
+              borderRadius: "10px",
+              fontFamily: "Special Gothic Expanded One, sans-serif",
+            }}
+          >
+            {isConnecting ? "Connecting..." : "Connect MetaMask"}
+          </Button>
+        )}
       </div>
     </Page>
-    // <div style={{ padding: "20px",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column" }}>
-    //   <h1></h1>
-    //   <button onClick={connectWallet} >🔌 Connect Wallet</button>
-    //   {/* <button onClick={handleSend}>💸 Send SEI</button> */}
-    // </div>
   );
 };
 
-export default SeiSender;
+export default Auth;

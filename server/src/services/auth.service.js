@@ -190,11 +190,10 @@ async function verifyEthereumSignature(address, message, signature) {
   try {
     // Ethereum signed messages are prefixed with this standard string
     // and hashed before signing
-    const signerAddress = ethers.utils.verifyMessage(message, signature);
-
+    const signerAddress = ethers.verifyMessage(message, signature);
     // Convert addresses to checksummed format for case-insensitive comparison
-    const normalizedInputAddress = ethers.utils.getAddress(address);
-    const normalizedRecoveredAddress = ethers.utils.getAddress(signerAddress);
+    const normalizedInputAddress = ethers.getAddress(address);
+    const normalizedRecoveredAddress = ethers.getAddress(signerAddress);
 
     return normalizedInputAddress === normalizedRecoveredAddress;
   } catch (error) {
@@ -245,6 +244,8 @@ class AuthService {
     try {
       const { walletAddress, signature } = data;
 
+      console.log({walletAddress,signature})
+
       if (!walletAddress || !signature) {
         throw new CustomError("Missing required parameters", 400);
       }
@@ -255,6 +256,7 @@ class AuthService {
       }
 
       const nonce = user.nonce;
+      
       if (!nonce) {
         throw new CustomError(
           "No nonce found for this wallet. Please request a new one.",
@@ -295,10 +297,7 @@ class AuthService {
         token,
       };
     } catch (error) {
-      if (error instanceof CustomError) {
-        throw error;
-      }
-      console.error("Error verifying signature:", error);
+      console.log(error)
       throw new CustomError("Failed to verify signature", 500);
     }
   }

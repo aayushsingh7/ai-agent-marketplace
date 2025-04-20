@@ -9,7 +9,7 @@ class UserController {
   }
 
   async getUserData(req, res) {
-    const { userID } = req.query;
+    const { userID } = req.params;
     try {
       const user = await this.userService.getUser(userID);
       res.status(200).send({
@@ -37,7 +37,7 @@ class UserController {
   }
 
   async fetchSubscriptions(req, res) {
-    const { userID } = req.query;
+    const { userID } = req.params;
     try {
       const results = await this.userService.fetchSubscriptions(userID);
       res

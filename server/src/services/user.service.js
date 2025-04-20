@@ -53,6 +53,7 @@ class UserService {
 
       return results;
     } catch (err) {
+      console.log(err)
       throw new CustomError("Oops something went wrong", 500);
     }
   }

@@ -128,7 +128,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
 
   const fetchAgentDetails = async(agentID:string)=> {
    try { 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/agents/agent?agentID=${agentID}`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/agents/${agentID}`)
       const data = await response.json();
       setAgentDetails(data.data)
    } catch (err) {
