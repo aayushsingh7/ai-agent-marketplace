@@ -9,12 +9,16 @@ import Settings from "./pages/Settings";
 import SideNav from "./layouts/SideNav";
 import Auth from "./pages/Auth";
 import Usage from "./pages/Usage";
+import VerifyUser from "./layouts/VerifyUser";
+import { useAppContext } from "./context/contextAPI";
 
 interface AppProps { }
 
 const App: FC<AppProps> = ({ }) => {
+  const {verifyUser} = useAppContext()
   return (
     <div>
+      {verifyUser && <VerifyUser/>}
      <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="/subscriptions" element={<div className="flex-page"><SideNav type="normal"/><Subscription/></div>}/>

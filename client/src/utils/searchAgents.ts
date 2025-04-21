@@ -1,12 +1,10 @@
 const searchAgents = async (
-    type: string,
-    navigate:any,
-    e: any
+    query:string,
+    navigate:any
   ): Promise<any[] | null> => {
-    if (type === "input" && e.key !== "Enter") return null;
     try {
-      navigate(`/marketplace?search=${e.target.value}`)
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/agents/search?query=${e.target.value}`);
+      if(query === "") navigate("/marketplace")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/agents/search?query=${query}`);
       const data = await res.json();
       return data;
     } catch (err) {

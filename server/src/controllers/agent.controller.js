@@ -12,18 +12,34 @@ class AgentController {
     this.getAgents = this.getAgents.bind(this);
   }
 
-  async getAgents (req,res) {
+  async getAgents(req, res) {
     try {
-      const results = await this.agent.find();
-      res.status(200).send({success:true,message:"Agents fetched successfully", data:results})
+      const results = await this.agent.find().populate([
+        {
+          path: "owner",
+          select: "username walletAddress",
+        },
+        {
+          path: "creator",
+          select: "username walletAddress",
+        },
+      ]);
+      res.status(200).send({
+        success: true,
+        message: "Agents fetched successfully",
+        data: results,
+      });
     } catch (err) {
-      console.log(err)
-      res.status(500).send({success:false,message:"Oops! something went wrong"})
+      console.log(err);
+      res
+        .status(500)
+        .send({ success: false, message: "Oops! something went wrong" });
     }
   }
   async searchAgents(req, res) {
     try {
       const { query } = req.query;
+      console.log("--------------------------------searchagents", query);
       const results = await this.agentService.searchAgent(query);
       res.status(200).send({
         success: true,
@@ -70,7 +86,6 @@ class AgentController {
 
   async useAgentAPI(req, res) {
     const { agentID } = req.query;
-    const apiKey = req.headers["sei-agents-access-key"];
 
     if (!agentID) {
       return res
@@ -85,7 +100,10 @@ class AgentController {
     }
 
     try {
-      const originalAPI = await this.agentService.useAgent(apiKey, agentID);
+      const originalAPI = await this.agentService.useAgent(
+        req.creditID,
+        agentID
+      );
       return res.status(200).redirect(originalAPI);
     } catch (err) {
       res.status(err.statusCode).send({

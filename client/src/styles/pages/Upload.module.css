@@ -54,7 +54,7 @@
 
 .markdown_container textarea{
     font-size: 0.6rem;
-    resize: none;
+    /* resize: none; */
     padding: 20px;
     outline: none;
     width: 50%;

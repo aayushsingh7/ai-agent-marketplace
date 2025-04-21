@@ -1,4 +1,5 @@
 import WalletService from "../services/wallet.service.js";
+import minterWallet from "../utils/mintingSerivce.js";
 
 class WalletController {
   constructor() {
@@ -10,12 +11,14 @@ class WalletController {
   }
 
   async buyCredits(req, res) {
-    const { wallet, tokenId, seiAmount, agentID } = req.body;
+    
+    const {tokenId, creditAmount, agentID } = req.body;
+    
     try {
       let result = await this.walletService.buyCredits(
-        wallet,
+        minterWallet,
         tokenId,
-        seiAmount,
+        creditAmount,
         agentID
       );
       res.status(200).send({
@@ -29,11 +32,11 @@ class WalletController {
   }
 
   async buyAgentNFT(req, res) {
-    const { wallet, tokenId, agentID } = req.body;
+    const {tokenID, agentID } = req.body;
     try {
       const result = await this.walletService.buyAgentNFT(
-        wallet,
-        tokenId,
+        minterWallet,
+        tokenID,
         agentID
       );
       res.status(200).send({
@@ -47,23 +50,13 @@ class WalletController {
   }
 
   async createAgent(req, res) {
-    const {
-      wallet,
-      recipient,
-      agentData,
-      creditCost,
-      salePrice,
-      forSale,
-      gasLimit,
-    } = req.body;
+    // console.log(req.body)
+    const { recipient, agentData, gasLimit } = req.body;
     try {
       const agent = await this.walletService.createAgent(
-        wallet,
+        minterWallet,
         recipient,
-        (agentData = {}),
-        creditCost,
-        salePrice,
-        forSale,
+        agentData,
         gasLimit
       );
 

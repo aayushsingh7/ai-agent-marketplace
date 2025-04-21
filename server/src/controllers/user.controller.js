@@ -1,8 +1,10 @@
+import UserCredit from "../database/models/userCredit.model.js";
 import UserService from "../services/user.service.js";
 
 class UserController {
   constructor() {
     this.userService = new UserService();
+    this.credit = UserCredit;
     this.getUserData = this.getUserData.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.fetchSubscriptions = this.fetchSubscriptions.bind(this);
@@ -49,6 +51,17 @@ class UserController {
         });
     } catch (err) {
       res.status(err.statusCode).send({ success: false, message: err.message });
+    }
+  }
+
+  async getUserCredit(req,res) {
+    try {
+      const {userID,agentID} = req.params;
+      const credit = await this.credit.findOne({user:userID,agent:agentID})
+      if(!credit) res.status(404).send({success:false,message:"No user credit found"})
+      res.status(200).send({success:true,message:"User credits fetched successfully",data:credit})
+    } catch (err) {
+      res.status(500).send({success:false,message:"Oops! something went wrong"})
     }
   }
 }

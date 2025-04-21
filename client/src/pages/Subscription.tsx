@@ -3,18 +3,21 @@ import Page from "../components/Page";
 import styles from "../styles/pages/Subscription.module.css";
 import Input from "../components/ui/Input";
 import AgentBox from "../components/AgentBox";
+import { useAppContext } from "../context/contextAPI";
+import { useNavigate } from "react-router-dom";
 
 interface SubscriptionProps {}
 
 const Subscription: FC<SubscriptionProps> = ({}) => {
-  let loggedInUser = { _id: "er9eif9iad9d" };
-  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+   const {loggedInUser} = useAppContext()
+    const [subscriptions, setSubscriptions] = useState<any[]>([]);
+    const navigate = useNavigate()
 
   const fetchSubscriptions = async () => {
-    console.log("HELLO MOTHERUCKER")
+   if(!loggedInUser?._id) return;
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/users/${loggedInUser._id}/subscriptions`);
+        `${import.meta.env.VITE_API_URL}/users/${loggedInUser._id}/subscriptions`,{credentials:"include"});
       const data = await response.json();
       setSubscriptions(data.data);
     } catch (err) {
@@ -24,7 +27,7 @@ const Subscription: FC<SubscriptionProps> = ({}) => {
 
   useEffect(() => {
     fetchSubscriptions();
-  }, []);
+  }, [loggedInUser]);
 
   return (
     <Page>

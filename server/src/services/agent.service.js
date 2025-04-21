@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Agent from "../database/models/agent.model.js";
 import User from "../database/models/user.model.js";
 import UserCredit from "../database/models/userCredit.model.js";
@@ -21,31 +22,48 @@ class AgentService {
   }
 
   async searchAgent(query) {
+    console.log("---------------------------------------------", query);
     try {
-      const agents = await this.agent.find({
-        $or: [
-          { name: { $regex: query, $options: "i" } },
-          { category: { $regex: query, $options: "i" } },
-          {
-            tags: {
-              $elemMatch: { $regex: query, $options: "i" },
+      const agents = await this.agent
+        .find({
+          $or: [
+            { name: { $regex: query, $options: "i" } },
+            { category: { $regex: query, $options: "i" } },
+            {
+              tags: {
+                $elemMatch: { $regex: query, $options: "i" },
+              },
             },
-          },
-        ],
-      });
+          ],
+        })
+        .populate({
+          path: "creator",
+          select: "username walletAddress",
+        });
       return agents;
     } catch (err) {
+      console.log(err);
       throw new CustomError("Failed to search agents: " + err.message);
     }
   }
 
   async getAgent(agentID) {
+    console.log("why the other fucking htis is triggering");
     try {
       if (!mongoose.Types.ObjectId.isValid(agentID)) {
         throw new CustomError("Invalid Agent ID format", 400);
       }
 
-      const agent = await this.agent.findOne({ _id: agentID });
+      const agent = await this.agent.findOne({ _id: agentID }).populate([
+        {
+          path: "owner",
+          select: "username walletAddress",
+        },
+        {
+          path: "creator",
+          select: "username walletAddress",
+        },
+      ]);
 
       if (!agent) {
         throw new CustomError("Agent not found", 404);
@@ -53,16 +71,14 @@ class AgentService {
 
       return agent;
     } catch (err) {
+      console.log(err);
       throw new CustomError("Failed to retrieve agent: " + err.message);
     }
   }
 
-  async useAgent(API_ACCESS_KEY, agentID) {
+  async useAgent(creditID, agentID) {
     try {
-      const decoded = jwt.verify(API_ACCESS_KEY, process.env.SECRET_KEY);
-      const { userID } = decoded;
-
-      const userCredit = await this.credit.findOne({ user: userID });
+      const userCredit = await this.credit.findOne({ _id: creditID });
       if (!userCredit) throw new CustomError("User credit not found", 404);
 
       if (userCredit.creditsCostPerRequest > userCredit.totalCredits) {
@@ -73,6 +89,7 @@ class AgentService {
       }
 
       userCredit.totalCredits -= userCredit.creditsCostPerRequest;
+      userCredit.creditsUsed += userCredit.creditsCostPerRequest;
       await userCredit.save();
 
       const agent = await this.agent.findOne({ _id: agentID });

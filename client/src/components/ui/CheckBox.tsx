@@ -11,8 +11,8 @@ interface CheckBoxProps {
 const CheckBox: FC<CheckBoxProps> = ({text="Accept Terms and Conditions",checkBoxStatus,changeCheckBoxStatus,description}) => {
     const [checked,setChecked] = useState<boolean>(false)
     return (
-    <label className={`checkbox_container ${checked ? "checked" : "unchecked"}`} onClick={()=> setChecked(!checked)}>
-    <div className="checkbox">
+    <label className={`checkbox_container ${checked ? "checked" : "unchecked"}`} onClick={()=> setChecked((oldData)=> !oldData)}>
+    <div className="checkbox" style={{flexShrink:"0"}}>
      <FaCheck/>
     </div>
      <div className="checkbox_text">

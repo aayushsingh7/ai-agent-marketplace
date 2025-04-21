@@ -2,8 +2,8 @@ import { Schema, model } from "mongoose";
 
 const userCreditsSchema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: "user" },
-    agent: { type: Schema.Types.ObjectId, ref: "agent" },
+    user: { type: Schema.Types.ObjectId, ref: "User" },
+    agent: { type: Schema.Types.ObjectId, ref: "Agent" },
     totalCredits: { type: Number, required: true },
     creditsUsed: { type: Number, required: true },
     creditsCostPerRequest: { type: Number, required: true, default: 1 },

@@ -205,7 +205,7 @@ async function verifyEthereumSignature(address, message, signature) {
 class AuthService {
   constructor() {
     this.user = User;
-    this.jwtSecret = process.env.JWT_SECRET || "450294r0jf4904ut90.4250348@*#*@fqefa.dfadte9GJ498937589u8UW8JR7.50829048590284HIEH38943809VNIOVEWRH0ekfhn948ut80*@)($*90ggjg";
+    this.jwtSecret = process.env.JWT_SECRET || "45409feeefqw.OPIPOI909343Mafdaerdf.eri393529fiadfasdf5pdfakdfeopk";
     this.jwtExpires = process.env.JWT_EXPIRES || "24h";
   }
 
@@ -285,16 +285,16 @@ class AuthService {
       const token = jwt.sign(
         {
           walletAddress,
-          userId: user._id,
+          userID: user._id,
         },
-        this.jwtSecret,
-        { expiresIn: this.jwtExpires }
+        this.jwtSecret
       );
 
       return {
         success: true,
         message: "Authentication successful",
         token,
+        data:user
       };
     } catch (error) {
       console.log(error)

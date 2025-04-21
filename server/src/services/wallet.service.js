@@ -2,6 +2,9 @@ import { ethers } from "ethers";
 import CustomError from "../utils/customError.js";
 import UserCredit from "../database/models/userCredit.model.js";
 import Agent from "../database/models/agent.model.js";
+import AgentService from "../services/agent.service.js";
+import User from "../database/models/user.model.js";
+import jwt from "jsonwebtoken";
 
 // ABI fragment for the AIAgentMarketplace contract
 const ABI = [
@@ -10,8 +13,8 @@ const ABI = [
   "function getAgentCreditCost(uint256 tokenId) public view returns (uint256)",
   "function getAgentSalePrice(uint256 tokenId) public view returns (uint256)",
   "function isAgentForSale(uint256 tokenId) public view returns (bool)",
-  "function buyCredit(uint256 tokenId, uint256 creditAmount) public payable nonReentrant",
-  "function buyAgent(uint256 tokenId) public payable nonReentrant",
+  "function buyCredit(uint256 tokenId, uint256 creditAmount) payable",
+  "function buyAgent(uint256 tokenId) payable",
   "function useAgent(uint256 tokenId) public returns (bool)",
   "function getCreditBalance(address user) public view returns (uint256)",
 ];
@@ -23,6 +26,8 @@ class WalletService {
     this.chainId = 1328;
     this.credit = UserCredit;
     this.agent = Agent;
+    this.agentService = new AgentService();
+    this.user = User;
 
     // Initialize provider
     this.provider = new ethers.JsonRpcProvider(this.rpcUrl, {
@@ -50,15 +55,19 @@ class WalletService {
    * Buy credits for using an agent
    * @param {Object} wallet - Ethers wallet instance
    * @param {string} tokenId - ID of the agent to buy credits for
-   * @param {number} seiAmount - Number of credits to purchase
+   * @param {number} creditAmount - Number of credits to purchase
    * @param {string} agentID - MongoDB ID of the agent
    * @param {string} [gasLimit] - Optional gas limit override
    * @returns {Object} Transaction receipt
    */
-  async buyCredits(wallet, tokenId, seiAmount, agentID, gasLimit) {
+  async buyCredits(wallet, tokenId, creditAmount, agentID, gasLimit) {
+    console.log({ tokenId, creditAmount, agentID });
     try {
-      if (!tokenId || !seiAmount || seiAmount <= 0 || !agentID) {
-        throw new CustomError("Invalid token ID, agent ID or credit amount", 400);
+      if (!tokenId || !creditAmount || creditAmount <= 0 || !agentID) {
+        throw new CustomError(
+          "Invalid token ID, agent ID or credit amount",
+          400
+        );
       }
 
       // Get agent from MongoDB
@@ -68,52 +77,93 @@ class WalletService {
       }
 
       const contract = await this.getContract(wallet);
+      let txOptions = {};
 
       // Make sure the credit cost is available
       if (!agent.rentingDetails || !agent.rentingDetails.costPerCredit) {
         throw new CustomError("Agent credit cost not defined", 400);
       }
 
-      // Calculate total cost in wei
-      const totalCost = ethers.parseEther(seiAmount.toString());
+      const userAddress = await wallet.getAddress();
+      let user = await this.user.findOne({
+        walletAddress: userAddress.toLowerCase(),
+      });
 
-      const txOptions = {
-        value: totalCost,
-      };
+      if (!user)
+       
+        throw new CustomError(
+          "User account not found. Please connect your wallet address to continue.",
+          404
+        );
 
-      // Add gas limit if provided
+      const totalCostInSei = agent.rentingDetails?.costPerCredit * creditAmount;
+
+      const totalCostInWei = ethers.parseEther(totalCostInSei.toString());
+
       if (gasLimit) {
         txOptions.gasLimit = gasLimit;
       }
 
       // Send transaction
-      const tx = await contract.buyCredit(tokenId, seiAmount, txOptions);
+      const tx = await contract.buyCredit(tokenId, creditAmount, {
+        ...txOptions,
+        value: totalCostInWei,
+      });
 
       // Wait for transaction to be mined
       const receipt = await tx.wait();
 
       // Update user credits in database
       try {
-        const userAddress = await wallet.getAddress();
-        
+        // const userAddress = await wallet.getAddress();
+        // let user = await this.user.findOne({
+        //   walletAddress: userAddress.toLowerCase(),
+        // });
+
+        // if (!user)
+        //   throw new CustomError(
+        //     "User account not found. Please connect your wallet address to continue.",
+        //     404
+        //   );
+
         // Find existing credit record or create new one
-        let userCredit = await this.credit.findOne({ 
-          userAddress: userAddress.toLowerCase(), 
-          agentId: agentID 
+        let userCredit = await this.credit.findOne({
+          walletAddress: userAddress.toLowerCase(),
+          agent: agentID,
+          user: user._id,
         });
-        
+
         if (userCredit) {
-          userCredit.credits += seiAmount;
+          userCredit.totalCredits += creditAmount;
           await userCredit.save();
         } else {
           userCredit = new this.credit({
-            userAddress: userAddress.toLowerCase(),
-            agentId: agentID,
-            credits: seiAmount,
-            tokenId: tokenId
+            walletAddress: userAddress.toLowerCase(),
+            agent: agentID,
+            totalCredits: creditAmount,
+            tokenId: tokenId,
+            creditsCostPerRequest: agent.rentingDetails.creditCostPerReq,
+            user: user._id,
+            history: [
+              {
+                type: "Purchased",
+                amount: creditAmount,
+                reason: "Purchased new credits",
+                timestamp: new Date().toISOString(),
+                gasFree: 0,
+                transactionHash: receipt.hash,
+              },
+            ],
           });
           await userCredit.save();
         }
+
+        const accessToken = await jwt.sign(
+          { userCreditID: userCredit._id, userID: user._id },
+          process.env.JWT_SECRET
+        );
+        userCredit.accessToken = accessToken;
+        await userCredit.save();
       } catch (dbErr) {
         console.error("Failed to update user credits in database:", dbErr);
         // We don't throw here as the blockchain transaction was successful
@@ -160,15 +210,18 @@ class WalletService {
         throw new CustomError("Agent is not for sale", 400);
       }
 
-      // Get the sale price
-      const salePrice = agent.salePrice;
-      if (!salePrice) {
+      const salePriceInSei = agent.salePrice;
+
+      // Convert SEI to wei for the transaction
+      const salePriceInWei = ethers.parseEther(salePriceInSei.toString());
+
+      if (!salePriceInSei) {
         throw new CustomError("Agent sale price not defined", 400);
       }
 
       // Create transaction options
       const txOptions = {
-        value: BigInt(salePrice),
+        value: salePriceInWei,
       };
 
       // Add gas limit if provided
@@ -185,7 +238,7 @@ class WalletService {
       // Update agent ownership in database
       try {
         const buyerAddress = await wallet.getAddress();
-        
+
         // Update agent ownership
         agent.owner = buyerAddress.toLowerCase();
         await agent.save();
@@ -208,215 +261,385 @@ class WalletService {
     }
   }
 
-//   /**
-//    * Create a new AI agent NFT
-//    * @param {Object} wallet - Ethers wallet instance
-//    * @param {string} recipient - Address that will own the NFT
-//    * @param {string} tokenURI - IPFS URI containing metadata of the agent
-//    * @param {number} creditCost - Cost in credits to use this agent
-//    * @param {number} salePrice - Price in SEI to buy this agent (0 if not for sale)
-//    * @param {boolean} forSale - Whether the agent is available for direct purchase
-//    * @param {Object} agentData - Additional agent data to save in MongoDB
-//    * @param {string} [gasLimit] - Optional gas limit override
-//    * @returns {Object} Transaction receipt and token ID
-//    */
-//   async createAgent(
-//     wallet,
-//     recipient,
-//     tokenURI,
-//     creditCost,
-//     salePrice,
-//     forSale,
-//     agentData = {},
-//     gasLimit
-//   ) {
-//     try {
-//       if (!recipient || !tokenURI) {
-//         throw new CustomError("Required parameters missing", 400);
-//       }
+  //   /**
+  //    * Create a new AI agent NFT
+  //    * @param {Object} wallet - Ethers wallet instance
+  //    * @param {string} recipient - Address that will own the NFT
+  //    * @param {string} tokenURI - IPFS URI containing metadata of the agent
+  //    * @param {number} creditCost - Cost in credits to use this agent
+  //    * @param {number} salePrice - Price in SEI to buy this agent (0 if not for sale)
+  //    * @param {boolean} forSale - Whether the agent is available for direct purchase
+  //    * @param {Object} agentData - Additional agent data to save in MongoDB
+  //    * @param {string} [gasLimit] - Optional gas limit override
+  //    * @returns {Object} Transaction receipt and token ID
+  //    */
+  //   async createAgent(
+  //     wallet,
+  //     recipient,
+  //     tokenURI,
+  //     creditCost,
+  //     salePrice,
+  //     forSale,
+  //     agentData = {},
+  //     gasLimit
+  //   ) {
+  //     try {
+  //       if (!recipient || !tokenURI) {
+  //         throw new CustomError("Required parameters missing", 400);
+  //       }
 
-//       const contract = await this.getContract(wallet);
+  //       const contract = await this.getContract(wallet);
 
-//       // Create transaction options
-//       const txOptions = {};
+  //       // Create transaction options
+  //       const txOptions = {};
 
-//       // Add gas limit if provided
-//       if (gasLimit) {
-//         txOptions.gasLimit = gasLimit;
-//       }
+  //       // Add gas limit if provided
+  //       if (gasLimit) {
+  //         txOptions.gasLimit = gasLimit;
+  //       }
 
-//       // Send transaction
-//       const tx = await contract.createAgent(
-//         recipient,
-//         tokenURI,
-//         creditCost,
-//         salePrice,
-//         forSale,
-//         txOptions
-//       );
+  //       // Send transaction
+  //       const tx = await contract.createAgent(
+  //         recipient,
+  //         tokenURI,
+  //         creditCost,
+  //         salePrice,
+  //         forSale,
+  //         txOptions
+  //       );
 
-//       // Wait for transaction to be mined
-//       const receipt = await tx.wait();
+  //       // Wait for transaction to be mined
+  //       const receipt = await tx.wait();
 
-//       // Find the AgentCreated event to get the token ID
-//       let tokenId;
-//       for (const log of receipt.logs) {
-//         try {
-//           const parsedLog = contract.interface.parseLog(log);
-//           if (parsedLog && parsedLog.name === "AgentCreated") {
-//             tokenId = parsedLog.args[0]; // The tokenId is the first indexed parameter
-//             break;
-//           }
-//         } catch (e) {
-//           // Skip logs that aren't from our contract
-//           continue;
-//         }
-//       }
+  //       // Find the AgentCreated event to get the token ID
+  //       let tokenId;
+  //       for (const log of receipt.logs) {
+  //         try {
+  //           const parsedLog = contract.interface.parseLog(log);
+  //           if (parsedLog && parsedLog.name === "AgentCreated") {
+  //             tokenId = parsedLog.args[0]; // The tokenId is the first indexed parameter
+  //             break;
+  //           }
+  //         } catch (e) {
+  //           // Skip logs that aren't from our contract
+  //           continue;
+  //         }
+  //       }
 
-//       // Save agent data to MongoDB
-//       try {
-//         const creatorAddress = await wallet.getAddress();
-        
-//         const newAgent = new this.agent({
-//           owner: recipient.toLowerCase(),
-//           creator: creatorAddress.toLowerCase(),
-//           tokenId: tokenId.toString(),
-//           tokenURI,
-//           isForSale: forSale,
-//           salePrice,
-//           rentingDetails: {
-//             costPerCredit: creditCost
-//           },
-//           ...agentData
-//         });
-        
-//         await newAgent.save();
-//       } catch (dbErr) {
-//         console.error("Failed to save agent to database:", dbErr);
-//         // We don't throw here as the blockchain transaction was successful
-//       }
+  //       // Save agent data to MongoDB
+  //       try {
+  //         const creatorAddress = await wallet.getAddress();
 
-//       return {
-//         transactionHash: receipt.hash,
-//         blockNumber: receipt.blockNumber,
-//         tokenId: tokenId.toString(),
-//         success: true,
-//       };
-//     } catch (err) {
-//       console.error("Create agent error:", err);
-//       throw new CustomError(err.message || "Failed to create agent", 500);
-//     }
-//   }
+  //         const newAgent = new this.agent({
+  //           owner: recipient.toLowerCase(),
+  //           creator: creatorAddress.toLowerCase(),
+  //           tokenId: tokenId.toString(),
+  //           tokenURI,
+  //           isForSale: forSale,
+  //           salePrice,
+  //           rentingDetails: {
+  //             costPerCredit: creditCost
+  //           },
+  //           ...agentData
+  //         });
 
-/**
- * Create a new AI agent NFT
- * @param {Object} wallet - Ethers wallet instance
- * @param {string} recipient - Address that will own the NFT
- * @param {Object} agentData - Additional agent data to save in MongoDB
- * @param {number} creditCost - Cost in credits to use this agent
- * @param {number} salePrice - Price in SEI to buy this agent (0 if not for sale)
- * @param {boolean} forSale - Whether the agent is available for direct purchase
- * @param {string} [gasLimit] - Optional gas limit override
- * @returns {Object} Transaction receipt and token ID
- */
-async createAgent(
-    wallet,
-    recipient,
-    agentData = {},
-    creditCost,
-    salePrice,
-    forSale,
-    gasLimit
-  ) {
+  //         await newAgent.save();
+  //       } catch (dbErr) {
+  //         console.error("Failed to save agent to database:", dbErr);
+  //         // We don't throw here as the blockchain transaction was successful
+  //       }
+
+  //       return {
+  //         transactionHash: receipt.hash,
+  //         blockNumber: receipt.blockNumber,
+  //         tokenId: tokenId.toString(),
+  //         success: true,
+  //       };
+  //     } catch (err) {
+  //       console.error("Create agent error:", err);
+  //       throw new CustomError(err.message || "Failed to create agent", 500);
+  //     }
+  //   }
+
+  // /**
+  //  * Create a new AI agent NFT
+  //  * @param {Object} wallet - Ethers wallet instance
+  //  * @param {string} recipient - Address that will own the NFT
+  //  * @param {Object} agentData - Additional agent data to save in MongoDB
+  //  * @param {number} creditCost - Cost in credits to use this agent
+  //  * @param {number} salePrice - Price in SEI to buy this agent (0 if not for sale)
+  //  * @param {boolean} forSale - Whether the agent is available for direct purchase
+  //  * @param {string} [gasLimit] - Optional gas limit override
+  //  * @returns {Object} Transaction receipt and token ID
+  //  */
+  // async createAgent(
+  //   wallet,
+  //   recipient,
+  //   agentData,
+  //   gasLimit
+  // ) {
+  //   try {
+  //     if (!recipient) {
+  //       throw new CustomError("Recipient address is required", 400);
+  //     }
+
+  //     // Generate a basic tokenURI with agent name if available or use placeholder
+  //     const metadataJSON = {
+  //       name: agentData.name || "AI Agent",
+  //       description: agentData.description || "AI Agent on SEI Blockchain",
+  //       attributes: [{ trainedOn: agentData.trainedOn }, { tags: agentData.tags}, { category: agentData.category}],
+  //     };
+
+  //     // Convert the metadata to a data URI (base64 encoded)
+  //     const metadataString = JSON.stringify(metadataJSON);
+  //     const tokenURI = `data:application/json;base64,${Buffer.from(
+  //       metadataString
+  //     ).toString("base64")}`;
+
+  //     const contract = await this.getContract(wallet);
+
+  //     // Create transaction options
+  //     const txOptions = {};
+
+  //     // Add gas limit if provided
+  //     if (gasLimit) {
+  //       txOptions.gasLimit = gasLimit;
+  //     }
+
+  //     // Send transaction
+  //     const tx = await contract.createAgent(
+  //       recipient,
+  //       tokenURI,
+  //       agentData.rentingDetails.costPerCredit,
+  //       agentData.salePrice,
+  //       agentData.isForSale,
+  //       txOptions
+  //     );
+
+  //     // Wait for transaction to be mined
+  //     const receipt = await tx.wait();
+
+  //     // Find the AgentCreated event to get the token ID
+  //     let tokenId;
+  //     for (const log of receipt.logs) {
+  //       try {
+  //         const parsedLog = contract.interface.parseLog(log);
+  //         if (parsedLog && parsedLog.name === "AgentCreated") {
+  //           tokenId = parsedLog.args[0]; // The tokenId is the first indexed parameter
+  //           break;
+  //         }
+  //       } catch (e) {
+  //         // Skip logs that aren't from our contract
+  //         continue;
+  //       }
+  //     }
+
+  //     // Save agent data to MongoDB
+  //     try {
+  //       agentData.ownershipHistory =  [
+  //         {
+  //           owner:recipient.toLowerCase(),
+  //           type:"Minted",
+  //           timestamp:new Date().toISOString(),
+  //           gasFree: gasLimit,
+  //           transactionHash:receipt.hash,
+  //         },
+  //       ]
+  //       const creatorAddress = await wallet.getAddress();
+  //       const newAgent = await this.agentService.createAgent({
+  //         ...agentData,
+  //         creator:creatorAddress.toLowerCase(),
+  //         tokenId:tokenId.toString()
+  //       })
+  //       await newAgent.save();
+  //     } catch (dbErr) {
+  //       console.error("Failed to save agent to database:", dbErr);
+  //       // We don't throw here as the blockchain transaction was successful
+  //     }
+
+  //     return {
+  //       transactionHash: receipt.hash,
+  //       blockNumber: receipt.blockNumber,
+  //       tokenId: tokenId.toString(),
+  //       success: true,
+  //     };
+  //   } catch (err) {
+  //     console.error("Create agent error:", err);
+  //     throw new CustomError(err.message || "Failed to create agent", 500);
+  //   }
+  // }
+
+  /**
+   * Create a new AI agent NFT
+   * @param {Object} wallet - Ethers wallet instance that will sign the transaction
+   * @param {string} recipient - Address that will own the NFT
+   * @param {Object} agentData - Additional agent data to save in MongoDB
+   * @param {string} [gasLimit] - Optional gas limit override
+   * @returns {Object} Transaction receipt and token ID
+   */
+  async createAgent(wallet, recipient, agentData, gasLimit) {
     try {
       if (!recipient) {
         throw new CustomError("Recipient address is required", 400);
       }
-  
-      // Generate a basic tokenURI with agent name if available or use placeholder
+
+      // Extract required parameters from agentData
+      const costPerCredit = ethers.parseEther(
+        `${agentData.rentingDetails?.costPerCredit}`
+      );
+      const salePrice = agentData.salePrice || 0;
+      const isForSale = agentData.isForSale || false;
+
+      // Generate metadata JSON
       const metadataJSON = {
         name: agentData.name || "AI Agent",
         description: agentData.description || "AI Agent on SEI Blockchain",
-        attributes: []
+        attributes: [
+          { trait_type: "Trained On", value: agentData.trainedOn.join(", ") },
+          { trait_type: "Category", value: agentData.category },
+          { trait_type: "Tags", value: agentData.tags.join(", ") },
+        ],
       };
-      
+
       // Convert the metadata to a data URI (base64 encoded)
       const metadataString = JSON.stringify(metadataJSON);
-      const tokenURI = `data:application/json;base64,${Buffer.from(metadataString).toString('base64')}`;
-  
+      const tokenURI = `data:application/json;base64,${Buffer.from(
+        metadataString
+      ).toString("base64")}`;
+
+      // Get contract instance
       const contract = await this.getContract(wallet);
-  
+
       // Create transaction options
       const txOptions = {};
-  
-      // Add gas limit if provided
       if (gasLimit) {
         txOptions.gasLimit = gasLimit;
       }
-  
-      // Send transaction
+
+      // Log transaction parameters for debugging
+      console.log("Creating agent with parameters:", {
+        recipient,
+        tokenURI: tokenURI.substring(0, 50) + "...", // Truncate for logging
+        costPerCredit,
+        salePrice,
+        isForSale,
+      });
+
+      // Send transaction to create agent
       const tx = await contract.createAgent(
         recipient,
         tokenURI,
-        creditCost,
+        costPerCredit,
         salePrice,
-        forSale,
+        isForSale,
         txOptions
       );
-  
+
+      console.log(`Transaction sent: ${tx.hash}`);
+
       // Wait for transaction to be mined
       const receipt = await tx.wait();
-  
-      // Find the AgentCreated event to get the token ID
+      console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
+
+      console.log(receipt);
+
       let tokenId;
-      for (const log of receipt.logs) {
-        try {
-          const parsedLog = contract.interface.parseLog(log);
-          if (parsedLog && parsedLog.name === "AgentCreated") {
-            tokenId = parsedLog.args[0]; // The tokenId is the first indexed parameter
-            break;
+
+      // Try to find the AgentCreated event directly
+      const agentCreatedEvent = receipt.events?.find(
+        (event) => event.event === "AgentCreated"
+      );
+
+      if (agentCreatedEvent && agentCreatedEvent.args) {
+        // Extract the token ID from the event arguments
+        tokenId = agentCreatedEvent.args[0].toString();
+        console.log(`Agent created with token ID: ${tokenId}`);
+      } else {
+        console.log("Named event not found, trying manual parsing...");
+
+        // Fall back to manual log parsing
+        for (const log of receipt.logs) {
+          try {
+            const parsedLog = contract.interface.parseLog(log);
+            if (parsedLog && parsedLog.name === "AgentCreated") {
+              tokenId = parsedLog.args[0].toString();
+              console.log(`Found token ID through manual parsing: ${tokenId}`);
+              break;
+            }
+          } catch (e) {
+            // Skip logs that can't be parsed with this interface
+            continue;
           }
-        } catch (e) {
-          // Skip logs that aren't from our contract
-          continue;
         }
       }
-  
+
+      if (!tokenId) {
+        console.warn("Could not find tokenId in transaction logs");
+      }
+
       // Save agent data to MongoDB
       try {
         const creatorAddress = await wallet.getAddress();
-        
-        const newAgent = new this.agent({
+
+        // Create ownership history record
+        const ownershipRecord = {
           owner: recipient.toLowerCase(),
-          creator: creatorAddress.toLowerCase(),
-          tokenId: tokenId.toString(),
-          tokenURI,
-          isForSale: forSale,
-          salePrice,
-          rentingDetails: {
-            costPerCredit: creditCost
-          },
-          ...agentData
+          type: "Minted",
+          timestamp: new Date().toISOString(),
+          gasFree: gasLimit || 0,
+          transactionHash: receipt.hash,
+        };
+
+        // Prepare blockchain details
+        const blockchainDetails = [
+          { blockchain: "Sei Network" },
+          { transactionHash: receipt.hash },
+        ];
+
+        // Format rentingDetails according to schema
+        const rentingDetails = [
+          { costPerCredit: costPerCredit },
+          { creditCostPerReq: agentData.rentingDetails?.creditCostPerReq || 1 },
+        ];
+
+        const creator = await this.user.findOne({
+          walletAddress: creatorAddress,
         });
-        
+
+        // Create the agent document
+        const newAgent = await this.agentService.createAgent({
+          ...agentData,
+          tokenId: tokenId,
+          creator: creator._id,
+          owner: creator._id,
+          ownershipHistory: [ownershipRecord],
+          blockchainDetails: blockchainDetails,
+          salePrice,
+          isForSale,
+          isNFT: true,
+          mintOnBlockchain: true,
+          rentingDetails,
+        });
+
         await newAgent.save();
+        console.log(`Agent saved to database with ID: ${newAgent._id}`);
       } catch (dbErr) {
         console.error("Failed to save agent to database:", dbErr);
         // We don't throw here as the blockchain transaction was successful
       }
-  
+
       return {
         transactionHash: receipt.hash,
         blockNumber: receipt.blockNumber,
-        tokenId: tokenId.toString(),
+        tokenId: tokenId?.toString() || "unknown",
         success: true,
+        receipt: receipt,
       };
     } catch (err) {
       console.error("Create agent error:", err);
       throw new CustomError(err.message || "Failed to create agent", 500);
     }
   }
-
   /**
    * Update agent information
    * @param {Object} wallet - Ethers wallet instance
@@ -484,7 +707,7 @@ async createAgent(
           agent.rentingDetails = {};
         }
         agent.rentingDetails.costPerCredit = newCreditCost;
-        
+
         await agent.save();
       } catch (dbErr) {
         console.error("Failed to update agent in database:", dbErr);
@@ -504,529 +727,6 @@ async createAgent(
       );
     }
   }
-  
-  // /**
-  //  * Use an agent and deduct credits from user's balance
-  //  * @param {Object} wallet - Ethers wallet instance
-  //  * @param {string} tokenId - ID of the agent NFT
-  //  * @param {string} agentID - MongoDB ID of the agent
-  //  * @param {string} [gasLimit] - Optional gas limit override
-  //  * @returns {Object} Result of the operation
-  //  */
-  // async useAgent(wallet, tokenId, agentID, gasLimit) {
-  //   try {
-  //     if (!tokenId || !agentID) {
-  //       throw new CustomError("Invalid token ID or agent ID", 400);
-  //     }
-
-  //     const contract = await this.getContract(wallet);
-  //     const userAddress = await wallet.getAddress();
-
-  //     // Check credits in the database first
-  //     const userCredit = await this.credit.findOne({ 
-  //       userAddress: userAddress.toLowerCase(), 
-  //       agentId: agentID 
-  //     });
-
-  //     if (!userCredit || userCredit.credits <= 0) {
-  //       throw new CustomError("Insufficient credits to use this agent", 400);
-  //     }
-
-  //     // Create transaction options
-  //     const txOptions = {};
-
-  //     // Add gas limit if provided
-  //     if (gasLimit) {
-  //       txOptions.gasLimit = gasLimit;
-  //     }
-
-  //     // Send transaction
-  //     const tx = await contract.useAgent(tokenId, txOptions);
-
-  //     // Wait for transaction to be mined
-  //     const receipt = await tx.wait();
-
-  //     // Update credits in database
-  //     userCredit.credits -= 1; // Deduct one credit for usage
-  //     await userCredit.save();
-
-  //     return {
-  //       transactionHash: receipt.hash,
-  //       blockNumber: receipt.blockNumber,
-  //       creditsRemaining: userCredit.credits,
-  //       success: true,
-  //     };
-  //   } catch (err) {
-  //     console.error("Use agent error:", err);
-  //     throw new CustomError(err.message || "Failed to use agent", 500);
-  //   }
-  // }
-
-  // /**
-  //  * Get user's credit balance for a specific agent
-  //  * @param {string} userAddress - Address to check
-  //  * @param {string} agentID - MongoDB ID of the agent
-  //  * @returns {number} The credit balance
-  //  */
-  // async getCreditBalance(userAddress, agentID) {
-  //   try {
-  //     if (!userAddress || !ethers.isAddress(userAddress) || !agentID) {
-  //       throw new CustomError("Invalid user address or agent ID", 400);
-  //     }
-
-  //     // Check credits in the database
-  //     const userCredit = await this.credit.findOne({ 
-  //       userAddress: userAddress.toLowerCase(), 
-  //       agentId: agentID 
-  //     });
-
-  //     if (!userCredit) {
-  //       return 0; // No credits found
-  //     }
-
-  //     return userCredit.credits;
-  //   } catch (err) {
-  //     console.error("Get credit balance error:", err);
-  //     throw new CustomError(err.message || "Failed to get credit balance", 500);
-  //   }
-  // }
 }
 
 export default WalletService;
-
-
-
-
-
-
-
-
-// import { ethers } from "ethers";
-// import CustomError from "../utils/customError.js";
-// import UserCredit from "../database/models/userCredit.model.js";
-// import Agent from "../database/models/agent.model.js";
-
-// // ABI fragment for the AIAgentMarketplace contract
-// const ABI = [
-//   "function createAgent(address recipient, string memory tokenURI, uint256 creditCost, uint256 salePrice, bool forSale) public returns (uint256)",
-//   "function updateAgentInfo(uint256 tokenId, uint256 newCreditCost, uint256 newSalePrice, bool newForSale) public",
-//   "function getAgentCreditCost(uint256 tokenId) public view returns (uint256)",
-//   "function getAgentSalePrice(uint256 tokenId) public view returns (uint256)",
-//   "function isAgentForSale(uint256 tokenId) public view returns (bool)",
-//   "function buyCredit(uint256 tokenId, uint256 creditAmount) public payable nonReentrant",
-//   "function buyAgent(uint256 tokenId) public payable nonReentrant",
-//   "function useAgent(uint256 tokenId) public returns (bool)",
-//   "function getCreditBalance(address user) public view returns (uint256)",
-// ];
-
-// class WalletService {
-//   constructor() {
-//     this.rpcUrl = "https://evm-rpc-testnet.sei-apis.com";
-//     this.contractAddress = "0x35b32b80FBe7526487d1b41c8860F684A7A48cc6";
-//     this.chainId = 1328;
-//     this.credit = UserCredit;
-//     this.agent = Agent
-
-//     // Initialize provider
-//     this.provider = new ethers.JsonRpcProvider(this.rpcUrl, {
-//       chainId: this.chainId,
-//       name: "SEI Testnet",
-//     });
-//   }
-
-//   // Helper method to get contract instance with signer
-//   async getContract(wallet) {
-//     if (!wallet) {
-//       throw new CustomError("Wallet connection required", 400);
-//     }
-
-//     const signer = wallet.connect(this.provider);
-//     return new ethers.Contract(this.contractAddress, ABI, signer);
-//   }
-
-//   /**
-//    * Buy credits for using an agent
-//    * @param {Object} wallet - Ethers wallet instance
-//    * @param {string} tokenId - ID of the agent to buy credits for
-//    * @param {number} creditAmount - Number of credits to purchase
-//    * @param {string} [gasLimit] - Optional gas limit override
-//    * @returns {Object} Transaction receipt
-//    */
-//   async buyCredits(wallet, tokenId, creditAmount, gasLimit, agentID) {
-//     try {
-//       if (!tokenId || !creditAmount || creditAmount <= 0) {
-//         throw new CustomError("Invalid token ID or credit amount", 400);
-//       }
-
-//       const contract = await this.getContract(wallet);
-//       const agent = await this.agent.findOne({_id:agentID})
-
-//       // Calculate total cost in wei
-//       const totalCost = agent.rentingDetails.costPerCredit * BigInt(creditAmount);
-
-//       const txOptions = {
-//         value: totalCost,
-//       };
-
-//       // Add gas limit if provided
-//       if (gasLimit) {
-//         txOptions.gasLimit = gasLimit;
-//       }
-
-//       // Send transaction
-//       const tx = await contract.buyCredit(tokenId, creditAmount, txOptions);
-
-//       // Wait for transaction to be mined
-//       const receipt = await tx.wait();
-
-//       return {
-//         transactionHash: receipt.hash,
-//         blockNumber: receipt.blockNumber,
-//         success: true,
-//       };
-//     } catch (err) {
-//       console.error("Buy credits error:", err);
-//       if (err.code === "INSUFFICIENT_FUNDS") {
-//         throw new CustomError("Insufficient funds for transaction", 400);
-//       }
-//       throw new CustomError(err.message || "Failed to buy credits", 500);
-//     }
-//   }
-
-//   /**
-//    * Buy an agent NFT directly
-//    * @param {Object} wallet - Ethers wallet instance
-//    * @param {string} tokenId - ID of the agent NFT to purchase
-//    * @param {string} [gasLimit] - Optional gas limit override
-//    * @returns {Object} Transaction receipt
-//    */
-//   async buyAgentNFT(wallet, tokenId, gasLimit,agentID) {
-//     try {
-//       if (!tokenId) {
-//         throw new CustomError("Invalid token ID", 400);
-//       }
-
-//       const contract = await this.getContract(wallet);
-
-//       // Check if agent is for sale
-//       const agent = await this.agent.findOne({_id:agentID});
-//       const isForSale = agent.isForSale;
-//       if (!isForSale) {
-//         throw new CustomError("Agent is not for sale", 400);
-//       }
-
-//       // Get the sale price
-//       const salePrice = await agent.salePrice;
-
-//       // Create transaction options
-//       const txOptions = {
-//         value: salePrice,
-//       };
-
-//       // Add gas limit if provided
-//       if (gasLimit) {
-//         txOptions.gasLimit = gasLimit;
-//       }
-
-//       // Send transaction
-//       const tx = await contract.buyAgent(tokenId, txOptions);
-
-//       // Wait for transaction to be mined
-//       const receipt = await tx.wait();
-
-//       return {
-//         transactionHash: receipt.hash,
-//         blockNumber: receipt.blockNumber,
-//         success: true,
-//       };
-//     } catch (err) {
-//       console.error("Buy agent NFT error:", err);
-//       if (err.code === "INSUFFICIENT_FUNDS") {
-//         throw new CustomError("Insufficient funds to buy NFT", 400);
-//       }
-//       throw new CustomError(err.message || "Failed to buy agent NFT", 500);
-//     }
-//   }
-
-//   /**
-//    * Create a new AI agent NFT
-//    * @param {Object} wallet - Ethers wallet instance
-//    * @param {string} recipient - Address that will own the NFT
-//    * @param {string} tokenURI - IPFS URI containing metadata of the agent
-//    * @param {number} creditCost - Cost in credits to use this agent
-//    * @param {number} salePrice - Price in SEI to buy this agent (0 if not for sale)
-//    * @param {boolean} forSale - Whether the agent is available for direct purchase
-//    * @param {string} [gasLimit] - Optional gas limit override
-//    * @returns {Object} Transaction receipt and token ID
-//    */
-//   async createAgent(
-//     wallet,
-//     recipient,
-//     tokenURI,
-//     creditCost,
-//     salePrice,
-//     forSale,
-//     gasLimit
-//   ) {
-//     try {
-//       if (!recipient || !tokenURI) {
-//         throw new CustomError("Required parameters missing", 400);
-//       }
-
-//       const contract = await this.getContract(wallet);
-
-//       // Create transaction options
-//       const txOptions = {};
-
-//       // Add gas limit if provided
-//       if (gasLimit) {
-//         txOptions.gasLimit = gasLimit;
-//       }
-
-//       // Send transaction
-//       const tx = await contract.createAgent(
-//         recipient,
-//         tokenURI,
-//         creditCost,
-//         salePrice,
-//         forSale,
-//         txOptions
-//       );
-
-//       // Wait for transaction to be mined
-//       const receipt = await tx.wait();
-
-//       // Find the AgentCreated event to get the token ID
-//       let tokenId;
-//       for (const log of receipt.logs) {
-//         try {
-//           const parsedLog = contract.interface.parseLog(log);
-//           if (parsedLog && parsedLog.name === "AgentCreated") {
-//             tokenId = parsedLog.args[0]; // The tokenId is the first indexed parameter
-//             break;
-//           }
-//         } catch (e) {
-//           // Skip logs that aren't from our contract
-//           continue;
-//         }
-//       }
-
-//       return {
-//         transactionHash: receipt.hash,
-//         blockNumber: receipt.blockNumber,
-//         tokenId,
-//         success: true,
-//       };
-//     } catch (err) {
-//       console.error("Create agent error:", err);
-//       throw new CustomError(err.message || "Failed to create agent", 500);
-//     }
-//   }
-
-//   /**
-//    * Update agent information
-//    * @param {Object} wallet - Ethers wallet instance
-//    * @param {string} tokenId - ID of the agent NFT
-//    * @param {number} newCreditCost - New credit cost
-//    * @param {number} newSalePrice - New sale price in SEI
-//    * @param {boolean} isForSale - Whether the agent is for sale
-//    * @param {string} [gasLimit] - Optional gas limit override
-//    * @returns {Object} Transaction receipt
-//    */
-//   async updateAgentInfo(
-//     wallet,
-//     tokenId,
-//     newCreditCost,
-//     newSalePrice,
-//     isForSale,
-//     gasLimit
-//   ) {
-//     try {
-//       if (!tokenId) {
-//         throw new CustomError("Invalid token ID", 400);
-//       }
-
-//       const contract = await this.getContract(wallet);
-
-//       // Create transaction options
-//       const txOptions = {};
-
-//       // Add gas limit if provided
-//       if (gasLimit) {
-//         txOptions.gasLimit = gasLimit;
-//       }
-
-//       // Send transaction
-//       const tx = await contract.updateAgentInfo(
-//         tokenId,
-//         newCreditCost,
-//         newSalePrice,
-//         isForSale,
-//         txOptions
-//       );
-
-//       // Wait for transaction to be mined
-//       const receipt = await tx.wait();
-
-//       return {
-//         transactionHash: receipt.hash,
-//         blockNumber: receipt.blockNumber,
-//         success: true,
-//       };
-//     } catch (err) {
-//       console.error("Update agent info error:", err);
-//       throw new CustomError(
-//         err.message || "Failed to update agent information",
-//         500
-//       );
-//     }
-//   }
-
-//   /**
-//    * Get agent credit cost
-//    * @param {string} tokenId - ID of the agent NFT
-//    * @returns {BigInt} The credit cost
-//    */
-//   async getAgentCreditCost(tokenId) {
-//     try {
-//       if (!tokenId) {
-//         throw new CustomError("Invalid token ID", 400);
-//       }
-
-//       const contract = new ethers.Contract(
-//         this.contractAddress,
-//         ABI,
-//         this.provider
-//       );
-//       return await contract.getAgentCreditCost(tokenId);
-//     } catch (err) {
-//       console.error("Get agent credit cost error:", err);
-//       throw new CustomError(
-//         err.message || "Failed to get agent credit cost",
-//         500
-//       );
-//     }
-//   }
-
-//   /**
-//    * Get agent sale price
-//    * @param {string} tokenId - ID of the agent NFT
-//    * @returns {BigInt} The sale price in SEI
-//    */
-//   async getAgentSalePrice(tokenId) {
-//     try {
-//       if (!tokenId) {
-//         throw new CustomError("Invalid token ID", 400);
-//       }
-
-//       const contract = new ethers.Contract(
-//         this.contractAddress,
-//         ABI,
-//         this.provider
-//       );
-//       return await contract.getAgentSalePrice(tokenId);
-//     } catch (err) {
-//       console.error("Get agent sale price error:", err);
-//       throw new CustomError(
-//         err.message || "Failed to get agent sale price",
-//         500
-//       );
-//     }
-//   }
-
-//   /**
-//    * Check if agent is for sale
-//    * @param {string} tokenId - ID of the agent NFT
-//    * @returns {boolean} Whether the agent is for sale
-//    */
-//   async isAgentForSale(tokenId) {
-//     try {
-//       if (!tokenId) {
-//         throw new CustomError("Invalid token ID", 400);
-//       }
-
-//       const contract = new ethers.Contract(
-//         this.contractAddress,
-//         ABI,
-//         this.provider
-//       );
-//       return await contract.isAgentForSale(tokenId);
-//     } catch (err) {
-//       console.error("Check if agent is for sale error:", err);
-//       throw new CustomError(
-//         err.message || "Failed to check if agent is for sale",
-//         500
-//       );
-//     }
-//   }
-
-//   /**
-//    * Use agent (spend credits)
-//    * @param {Object} wallet - Ethers wallet instance
-//    * @param {string} tokenId - ID of the agent NFT to use
-//    * @param {string} [gasLimit] - Optional gas limit override
-//    * @returns {Object} Transaction receipt and whether had enough credits
-//    */
-//   async useAgent(wallet, tokenId, gasLimit) {
-//     try {
-//       if (!tokenId) {
-//         throw new CustomError("Invalid token ID", 400);
-//       }
-
-//       const contract = await this.getContract(wallet);
-
-//       // Create transaction options
-//       const txOptions = {};
-
-//       // Add gas limit if provided
-//       if (gasLimit) {
-//         txOptions.gasLimit = gasLimit;
-//       }
-
-//       // Send transaction
-//       const tx = await contract.useAgent(tokenId, txOptions);
-
-//       // Wait for transaction to be mined
-//       const receipt = await tx.wait();
-
-//       // Parse return value (success)
-//       const hasEnoughCredits = receipt.status === 1;
-
-//       return {
-//         transactionHash: receipt.hash,
-//         blockNumber: receipt.blockNumber,
-//         hasEnoughCredits,
-//         success: true,
-//       };
-//     } catch (err) {
-//       console.error("Use agent error:", err);
-//       throw new CustomError(err.message || "Failed to use agent", 500);
-//     }
-//   }
-
-//   /**
-//    * Get user's credit balance
-//    * @param {string} userAddress - Address to check
-//    * @returns {BigInt} The credit balance
-//    */
-//   async getCreditBalance(userAddress) {
-//     try {
-//       if (!userAddress || !ethers.isAddress(userAddress)) {
-//         throw new CustomError("Invalid user address", 400);
-//       }
-
-      
-//     //   const contract = new ethers.Contract(
-//     //     this.contractAddress,
-//     //     ABI,
-//     //     this.provider
-//     //   );
-//     //   return await contract.getCreditBalance(userAddress);
-//     } catch (err) {
-//       console.error("Get credit balance error:", err);
-//       throw new CustomError(err.message || "Failed to get credit balance", 500);
-//     }
-//   }
-// }
-
-// export default WalletService;

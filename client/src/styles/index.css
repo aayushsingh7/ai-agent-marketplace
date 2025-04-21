@@ -67,8 +67,9 @@ a {
   cursor: pointer;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
     rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
-  border-radius: 5px;
-}
+    border-radius: 5px;
+    background:#ffffff;
+  }
 
 .drop_down_main_content {
   padding: 8px 10px;
@@ -82,6 +83,7 @@ a {
 }
 
 .drop_down_option {
+  z-index: 10;
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -149,5 +151,49 @@ a {
     margin-top: 2px;
     color: #969696;
     font-weight: 600;
-
 }
+
+.verify_page{
+  width: 100vw;
+  height: 100dvh;
+  background: #ffffff;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verify_text{
+  margin-left: 20px;
+}
+
+.verify_text h3{
+font-size: 0.8rem;
+}
+
+.verify_text p{
+  font-size: 0.6rem;
+  margin-top: 5px;
+  color: #888888;
+  font-weight: 600;
+}
+
+.loader {
+  width: 50px;
+  padding: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #25b09b;
+  --_m: 
+    conic-gradient(#0000 10%,#000),
+    linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+          mask: var(--_m);
+  -webkit-mask-composite: source-out;
+          mask-composite: subtract;
+  animation: l3 1s infinite linear;
+}
+@keyframes l3 {to{transform: rotate(1turn)}}

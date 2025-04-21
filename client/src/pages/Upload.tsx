@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Page from "../components/Page";
 import Input from "../components/ui/Input";
 import styles from "../styles/pages/Upload.module.css";
@@ -6,18 +6,83 @@ import Button from "../components/ui/Button";
 import CheckBox from "../components/ui/CheckBox";
 import DropDown from "../components/ui/DropDown";
 import MarkdownPreview from "@uiw/react-markdown-preview";
+import { useAppContext } from "../context/contextAPI";
+import { useNavigate } from "react-router-dom";
+import MDEditor from "@uiw/react-md-editor";
 
 interface UploadProps {}
 
 const Upload: FC<UploadProps> = ({}) => {
-  const [mintAsNFT, setMintAsNFT] = useState<boolean>(false);
+  const { loggedInUser } = useAppContext();
+  const navigate = useNavigate()
 
-  const [agentPlanType, setAgentPlanType] = useState<string>("");
-
-  const [markdownText, setMarkdownText] = useState<string>("");
+  const [markdownText, setMarkdownText] = useState<string>(``);
   const [formSection, setFormSection] = useState<number>(0);
 
-  const [confirmSubmission, setConfirmSubmission] = useState<boolean>(false)
+  const [description, setDescription] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
+  const [agentPurpose, setAgentPurpose] = useState<string>("");
+  const [deployedURL, setDeployedURL] = useState<string>("");
+  const [agentName, setAgentName] = useState<string>("");
+
+  const [agentPlanType, setAgentPlanType] = useState<string>("Paid");
+  const [usageLicense, setUsageLicense] = useState<string>("Commercial Use");
+  const [agentStatus, setAgentStatus] = useState<string>("Available");
+
+  const [tags, setTags] = useState<any[]>([]);
+  const [trainedOn, setTrainedOne] = useState<any[]>([]);
+  const [confirmSubmission, setConfirmSubmission] = useState<boolean>(false);
+
+  const [isForSale, setIsForSale] = useState<boolean>(false);
+  const [agentSalePrice, setAgentSalePrice] = useState<number>(0);
+  const [creditCostPerReq, setCreditCostPerReq] = useState<number>(1);
+  const [costPerCredit, setCostPerCredit] = useState<number>(0.1);
+
+  const createAgent = async () => {
+    try {
+      const data = {
+        name: agentName,
+        description: description,
+        category: category,
+        mintOnBlockchain: true,
+        planType: agentPlanType,
+        owner: "",
+        creator: "",
+        purpose: agentPurpose,
+        trainedOn: trainedOn,
+        tags: tags,
+        status: agentStatus == "Available" ? 1 : 0,
+        usageLicense: usageLicense,
+        isForSale: true,
+        salePrice: agentSalePrice,
+        documentation: markdownText,
+        deployedAPI: deployedURL,
+        rentingDetails: {
+          costPerCredit: costPerCredit,
+          creditCostPerReq: creditCostPerReq,
+        },
+      };
+
+      console.log(data);
+
+      const upload = await fetch(
+        `${import.meta.env.VITE_API_URL}/wallets/mint`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agentData: data,
+            recipient: "0x716d3DAde4C4CF4374A54F9A9d388850e739c5E2",
+          }),
+        }
+      );
+      const response = await upload.json();
+      console.log(response);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   return (
     <Page>
@@ -27,7 +92,15 @@ const Upload: FC<UploadProps> = ({}) => {
           className={`${styles.form} ${
             formSection == 0 ? styles.sixty : styles.full
           }`}
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && formSection == 0) {
+              e.preventDefault();
+            }
+          }}
         >
           {formSection == 0 ? (
             <>
@@ -35,7 +108,11 @@ const Upload: FC<UploadProps> = ({}) => {
                 <h3>✨ Agent Information</h3>
                 <div className={styles.input_field}>
                   <span>Enter Agent Name</span>
-                  <Input placeholder="" />
+                  <Input
+                    placeholder=""
+                    onChange={(e) => setAgentName(e.target.value)}
+                    value={agentName}
+                  />
                 </div>
 
                 <div className={styles.input_field}>
@@ -48,21 +125,97 @@ const Upload: FC<UploadProps> = ({}) => {
                       *
                     </span>
                   </span>
-                  <Input placeholder="" />
+                  <Input
+                    placeholder=""
+                    onChange={(e) => setDescription(e.target.value)}
+                    value={description}
+                  />
                 </div>
 
                 <div className={styles.input_field}>
                   <span>
                     Enter Agent Category (eg:- Booking, Chatboat, etc.)
                   </span>
-                  <Input placeholder="" />
+                  <Input
+                    placeholder=""
+                    onChange={(e) => setCategory(e.target.value)}
+                    value={category}
+                  />
                 </div>
 
                 <div className={styles.input_field}>
                   <span>
                     Enter Agent Purpose (eg:- Booking Tickets, Automation, etc.)
                   </span>
-                  <Input placeholder="" />
+                  <Input
+                    placeholder=""
+                    onChange={(e) => setAgentPurpose(e.target.value)}
+                    value={agentPurpose}
+                  />
+                </div>
+
+                <div className={styles.input_field}>
+                  <span>Enter Agent Deployed URL (https)</span>
+                  <Input
+                    placeholder=""
+                    onChange={(e) => setDeployedURL(e.target.value)}
+                    value={deployedURL}
+                  />
+                </div>
+
+                <div className={styles.input_field}>
+                  <span>Agent Trained On (include links, topics, etc)</span>
+                  <Input
+                    placeholder=""
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        setTrainedOne((oldData) => [
+                          ...oldData,
+                          //@ts-ignore
+                          e.target?.value,
+                        ]);
+                      }
+                    }}
+                  />
+                  <div>
+                    {trainedOn.map((data) => {
+                      return <span>{data}</span>;
+                    })}
+                  </div>
+                </div>
+
+                <div className={styles.input_field}>
+                  <span>Add Agent Tags</span>
+                  <Input
+                    placeholder=""
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        //@ts-ignore
+                        setTags((oldData) => [...oldData, e.target?.value]);
+                      }
+                    }}
+                  />
+                  <div>
+                    {tags.map((data) => {
+                      return <span>{data}</span>;
+                    })}
+                  </div>
+                </div>
+
+                <div
+                  className={styles.input_field}
+                  style={{ marginTop: "10px" }}
+                >
+                  <span style={{ marginBottom: "7px" }}>
+                    Select Agent Usage License
+                  </span>
+                  <DropDown
+                    changeDefaultValue={setUsageLicense}
+                    valuesList={["Commercial Use", "Developement Use"]}
+                    defaultValue={usageLicense}
+                  />
                 </div>
 
                 <div
@@ -73,13 +226,9 @@ const Upload: FC<UploadProps> = ({}) => {
                     Select Agent Status
                   </span>
                   <DropDown
-                    changeDefaultValue={setAgentPlanType}
-                    valuesList={[
-                      "Commercial Use",
-                      "Developement Use",
-                      "UnAvailable",
-                    ]}
-                    defaultValue="Commercial Use"
+                    changeDefaultValue={setAgentStatus}
+                    valuesList={["Available", "UnAvailable"]}
+                    defaultValue={agentStatus}
                   />
                 </div>
 
@@ -93,7 +242,7 @@ const Upload: FC<UploadProps> = ({}) => {
                   <DropDown
                     changeDefaultValue={setAgentPlanType}
                     valuesList={["Paid", "Free"]}
-                    defaultValue="Paid"
+                    defaultValue={agentPlanType}
                   />
                 </div>
 
@@ -102,11 +251,28 @@ const Upload: FC<UploadProps> = ({}) => {
                     description={
                       "By checking it, you will be able to sell your agents as NFTs"
                     }
-                    changeCheckBoxStatus={setMintAsNFT}
-                    checkBoxStatus={mintAsNFT}
-                    text="Mint Agent as NFT"
+                    changeCheckBoxStatus={setIsForSale}
+                    checkBoxStatus={isForSale}
+                    text="Sell Agent As NFT"
                   />
                 </div>
+
+                {isForSale && (
+                  <div className={styles.input_field}>
+                    <span>Enter Agent Selling Price ($)</span>
+                    <Input
+                      onChange={(e) =>
+                        setAgentSalePrice(parseInt(e.target.value))
+                      }
+                      placeholder=""
+                      type="number"
+                      min={5}
+                      max={100000}
+                      step={1}
+                      defaultValue={5}
+                    />
+                  </div>
+                )}
               </section>
 
               <section className={styles.form_section}>
@@ -123,6 +289,14 @@ const Upload: FC<UploadProps> = ({}) => {
                     value={"sei19qfqe50993403320r0952039j"}
                   />
                 </div>
+
+                <div className={styles.input_field}>
+                  <span>Creator Wallet Address</span>
+                  <Input
+                    placeholder=""
+                    value={"sei19qfqe50993403320r0952039j"}
+                  />
+                </div>
               </section>
 
               <section className={styles.form_section}>
@@ -132,11 +306,13 @@ const Upload: FC<UploadProps> = ({}) => {
                     Cost Per Credit (how many sei is reqiured to buy 1 credit)
                   </span>
                   <Input
+                    //  value={costPerCredit}
+                    onChange={(e) => setCostPerCredit(parseInt(e.target.value))}
                     type="number"
-                    min={0.01}
-                    max={0.1}
-                    defaultValue={0.01}
-                    step={0.01}
+                    min={0.001}
+                    max={0.08}
+                    defaultValue={0.001}
+                    step={0.001}
                   />
                 </div>
 
@@ -145,6 +321,10 @@ const Upload: FC<UploadProps> = ({}) => {
                     Credit Post Per Request (credits to charge per request)
                   </span>
                   <Input
+                    // value={creditCostPerReq}
+                    onChange={(e) =>
+                      setCreditCostPerReq(parseInt(e.target.value))
+                    }
                     type="number"
                     min={0.1}
                     max={10}
@@ -161,29 +341,35 @@ const Upload: FC<UploadProps> = ({}) => {
                 data-color-mode="light"
                 className={styles.markdown_container}
               >
-
-                <textarea onChange={(e)=> setMarkdownText(e.target.value)}></textarea>
+                <textarea
+                  onChange={(e) => setMarkdownText(e.target.value)}
+                ></textarea>
                 <div className={styles.preview}>
-                <MarkdownPreview
-                style={{padding:"20px"}}
-                wrapperElement={{ "data-color-mode": "light" }}
-                source={markdownText}
-                />
+                  <MarkdownPreview
+                    style={{ padding: "20px" }}
+                    wrapperElement={{ "data-color-mode": "light" }}
+                    source={markdownText}
+                  />
                 </div>
-
+              {/* <MDEditor.Markdown source={`# How are ou`} style={{ whiteSpace: 'pre-wrap',height:"500px" }} /> */}
               </div>
 
-              {/* <MDEditor.Markdown source={value} style={{ whiteSpace: 'pre-wrap' }} /> */}
             </section>
           )}
           <div>
-            {formSection == 1 &&  <CheckBox changeCheckBoxStatus={setConfirmSubmission} checkBoxStatus={confirmSubmission} text="I confirm that all the data entered above are true & ethical" />}
+            {formSection == 1 && (
+              <CheckBox
+                changeCheckBoxStatus={setConfirmSubmission}
+                checkBoxStatus={confirmSubmission}
+                text="I confirm that all the data entered above are true & ethical"
+              />
+            )}
             {formSection == 0 ? (
               <Button onClick={() => setFormSection(1)}>Next</Button>
             ) : (
               <>
                 <Button onClick={() => setFormSection(0)}>Prev</Button>{" "}
-                <Button onClick={() => setFormSection(1)}>Submit for Review</Button>
+                <Button onClick={createAgent}>Submit for Review</Button>
               </>
             )}
           </div>

@@ -12,8 +12,9 @@ dotenv.config()
 const app = express()
 connectDB()
 
-app.use(cors({credentials:true,origin:true}))
 app.use(cookieParser())
+app.use(cors({credentials:true,origin:true}))
+app.use(express.json())
 
 app.use("/api/v1/agents", agentRoutes)
 app.use("/api/v1/auth", authRoutes)

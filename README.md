@@ -1,5 +1,7 @@
 <!-- # 🤖 Decentralized AI Bot Marketplace on Sei
 
+> eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRBZ…3Mzl9.2cuqL0NskAwkiX08Fmkz28vlVSak7FdAR8_NCEmSYlU
+
 ## 🔍 Problem
 
 AI is transforming the world, but:

@@ -58,7 +58,8 @@ tr:nth-child(even) {
     color: #000;
 }
 
-.blockchain_info{
+.blockchain_info,
+.owner_info{
     margin-top: 40px;
 }
 
@@ -145,3 +146,36 @@ tr:nth-child(even) {
   box-shadow: #b300009c 0px 3px 8px;
   border: 2px solid #b30000;
 }
+
+.selected_credit_plan{
+  box-shadow: #b300009c 0px 3px 8px;
+  border: 2px solid #b30000;
+}
+
+.agent_option{
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  margin-left: 50px;
+}
+
+.agent_option button{
+  font-size: 0.6rem;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-weight: 600;
+  min-width: 150px;
+  background: none;
+}
+
+.agent_option button:nth-child(2){
+  background: #b30000;
+  color: #ffffff;
+  border: 3px solid #b30000;
+}
+
+.agent_option button:nth-child(1){
+color: #b30000;
+border: 2px solid #b30000;
+}
+

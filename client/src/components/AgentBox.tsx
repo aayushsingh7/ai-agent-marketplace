@@ -12,6 +12,7 @@ interface AgentBoxProps {
 }
 
 const AgentBox: FC<AgentBoxProps> = ({ allowBorder, type = "normal",data }) => {
+  console.log(data)
   const navigate = useNavigate();
   return (
     <figure
@@ -36,6 +37,7 @@ const AgentBox: FC<AgentBoxProps> = ({ allowBorder, type = "normal",data }) => {
         </div>
         <figcaption className={styles.agent_caption}>
           <h4>
+
             {data.name}
             <span>
               {data.verified && <RiVerifiedBadgeFill />}
@@ -71,7 +73,7 @@ const AgentBox: FC<AgentBoxProps> = ({ allowBorder, type = "normal",data }) => {
               </div>
 
               <span className={styles.total_used}>
-                Created by <span>{data.owner.username}</span>
+                Created by <span>{data?.owner?.username}</span>
               </span>
             </>
           ) : (

@@ -33,24 +33,31 @@ const MarketPlace: FC<MarketPlaceProps> = ({}) => {
     fetchAgents();
   }, []);
 
+  useEffect(() => {
+    // @ts-ignore
+    setSearchData(searchAgents(searchQuery, navigate));
+  }, [searchQuery]);
+
   return (
     <Page>
       <Input
-      // @ts-ignore
-        onKeyDown={(e) => setSearchData(searchAgents("input", navigate, e))}
+        onKeyDown={(e) =>
+          //@ts-ignore
+          e.key == "Enter" && navigate(`/marketplace?search=${e.target.value}`)
+        }
         placeholder="Search Agents (eg: Booking agents, Trading agents, etc..)"
       />
       {searchData.length > 0 ? (
         <section className={styles.agents_container}>
-         {searchData.map((agent)=> {
-          return  <AgentBox data={agent} type="normal" allowBorder={true} />
-         })}
+          {searchData.map((agent) => {
+            return <AgentBox data={agent} type="normal" allowBorder={true} />;
+          })}
         </section>
       ) : (
         <section className={styles.agents_container}>
-         {agents.map((agent)=> {
-          return  <AgentBox data={agent} type="normal" allowBorder={true} />
-         })}
+          {agents.map((agent) => {
+            return <AgentBox data={agent} type="normal" allowBorder={true} />;
+          })}
         </section>
       )}
     </Page>
