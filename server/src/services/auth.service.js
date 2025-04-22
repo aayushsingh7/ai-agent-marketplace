@@ -1,185 +1,3 @@
-// import crypto from "crypto";
-// import jwt from "jsonwebtoken";
-// import User from "../database/models/user.model.js";
-// // import { Secp256k1, sha256 } from "@cosmjs/crypto";
-// // import { fromBase64, toUtf8 } from "@cosmjs/encoding";
-// // import bech32 from "bech32";
-// import CustomError from "../utils/customError.js";
-// import { StargateClient } from "@cosmjs/stargate";
-
-// // function getSenderReceiver(data) {
-// //   const transferEvent = data.events.find((event) => event.type === "transfer");
-// //   if (!transferEvent) return { sender: null, receiver: null };
-
-// //   let sender = null;
-// //   let receiver = null;
-
-// //   for (const attr of transferEvent.attributes) {
-// //     if (attr.key === "sender") sender = attr.value;
-// //     if (attr.key === "recipient") receiver = attr.value;
-// //   }
-
-// //   return { sender, receiver };
-// // }
-
-// async function verifyCosmosSignature(
-//   address,
-//   nonce,
-//   signatureBase64,
-//   pubkeyBase64
-// ) {
-//   const messageBytes = toUtf8(nonce);
-//   const hashed = sha256(messageBytes);
-//   const signature = fromBase64(signatureBase64);
-//   const pubkey = fromBase64(pubkeyBase64);
-
-//   const isValid = await Secp256k1.verifySignature(signature, hashed, pubkey);
-//   if (!isValid) return false;
-
-//   // Verify derived address matches the claimed address
-//   const rawAddress = sha256(pubkey).slice(0, 20); // Cosmos address = first 20 bytes of SHA256(pubkey)
-//   const derivedAddress = bech32.encode("sei", bech32.toWords(rawAddress));
-
-//   return derivedAddress === address;
-// }
-
-// class AuthService {
-//   constructor() {
-//     this.user = User;
-//     this.jwtSecret = process.env.JWT_SECRET || "your-jwt-secret-key";
-//     this.jwtExpires = process.env.JWT_EXPIRES || "24h";
-//   }
-
-//   async generateNonce(query) {
-//     try {
-//       const { walletAddress } = query;
-
-//       if (!walletAddress) {
-//         throw new CustomError("Wallet address is required", 400);
-//       }
-
-//       const nonce = crypto.randomBytes(16).toString("hex");
-
-//       let user = await User.findOne({ walletAddress });
-//       if (!user) {
-//         user = new User({ walletAddress, nonce });
-//       } else {
-//         user.nonce = nonce;
-//       }
-
-//       await user.save();
-//       return { nonce };
-//     } catch (error) {
-//       if (error instanceof CustomError) {
-//         throw error;
-//       }
-//       console.error("Error generating nonce:", error);
-//       throw new CustomError("Failed to generate nonce", 500);
-//     }
-//   }
-
-//   async verifySignature(data) {
-//     try {
-//       const { walletAddress, signature, pubkey } = data;
-
-//       if (!walletAddress || !signature || !pubkey) {
-//         throw new CustomError("Missing required parameters", 400);
-//       }
-
-//       const user = await User.findOne({ walletAddress });
-//       if (!user) {
-//         throw new CustomError("User not found", 404);
-//       }
-
-//       const nonce = user.nonce;
-//       if (!nonce) {
-//         throw new CustomError(
-//           "No nonce found for this wallet. Please request a new one.",
-//           400
-//         );
-//       }
-
-//       const isValid = await verifyCosmosSignature(
-//         walletAddress,
-//         nonce,
-//         signature,
-//         pubkey
-//       );
-
-//       if (!isValid) {
-//         throw new CustomError("Invalid signature", 401);
-//       }
-
-//       // Clear the nonce after successful verification to prevent replay attacks
-//       user.nonce = null;
-//       await user.save();
-
-//       // Generate JWT token
-//       const token = jwt.sign(
-//         {
-//           walletAddress,
-//           userId: user._id,
-//         },
-//         this.jwtSecret,
-//         { expiresIn: this.jwtExpires }
-//       );
-
-//       return {
-//         success: true,
-//         message: "Authentication successful",
-//         token,
-//       };
-//     } catch (error) {
-//       if (error instanceof CustomError) {
-//         throw error;
-//       }
-//       console.error("Error verifying signature:", error);
-//       throw new CustomError("Failed to verify signature", 500);
-//     }
-//   }
-
-//   validateToken(token) {
-//     if (!token) {
-//       throw new CustomError("No token provided", 401);
-//     }
-
-//     try {
-//       // Remove Bearer prefix if present
-//       if (token.startsWith("Bearer ")) {
-//         token = token.slice(7);
-//       }
-
-//       const decoded = jwt.verify(token, this.jwtSecret);
-//       return decoded;
-//     } catch (error) {
-//       throw new CustomError("Invalid or expired token", 401);
-//     }
-//   }
-
-//   // async validTransaction(txHash) {
-//   //   try {
-//   //     const rpcEndpoint = "https://rpc.atlantic-2.seinetwork.io"; // Example testnet RPC
-//   //     const client = await StargateClient.connect(rpcEndpoint);
-//   //     const tx = await client.getTx(txHash);
-//   //     if (!tx) {
-//   //       console.log("Transaction not found");
-//   //       return;
-//   //     }
-
-//   //     const data = getSenderReceiver(tx);
-//   //     return data;
-//   //   } catch (err) {
-//   //     console.log(err);
-//   //     throw new CustomError(
-//   //       "Something went wrong while validating the transaction",
-//   //       500
-//   //     );
-//   //   }
-//   // }
-// }
-
-// export default AuthService;
-
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import User from "../database/models/user.model.js";
@@ -201,6 +19,19 @@ async function verifyEthereumSignature(address, message, signature) {
     return false;
   }
 }
+
+function generateUsername() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz123456789';
+  let username = '';
+
+  for (let i = 0; i < 10; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    username += chars[randomIndex];
+  }
+
+  return username;
+}
+
 
 class AuthService {
   constructor() {
@@ -224,7 +55,7 @@ class AuthService {
 
       let user = await User.findOne({ walletAddress });
       if (!user) {
-        user = new User({ walletAddress, nonce });
+        user = new User({ walletAddress, nonce, freeRequestsPerAgent:[], username:generateUsername()});
       } else {
         user.nonce = nonce;
       }

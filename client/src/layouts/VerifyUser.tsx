@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { useAppContext } from "../context/contextAPI";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface VerifyUserProps {}
 
@@ -8,6 +8,7 @@ const VerifyUser: FC<VerifyUserProps> = ({}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { setLoggedInUser, setVerifyUser } = useAppContext();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const authenticateUser = async () => {
@@ -22,15 +23,15 @@ const VerifyUser: FC<VerifyUserProps> = ({}) => {
         let user = await response.json();
         if (response.status == 200) {
           setLoggedInUser(() => user.data);
-          setVerifyUser(() => false);
         } else {
-          navigate("/auth");
+          if(location.pathname !== '/') navigate("/auth");
         }
       } catch (err) {
         console.error(err);
         navigate("/auth")
       }
       setLoading(false);
+      setVerifyUser(() => false);
     };
     authenticateUser();
   }, []);

@@ -4,15 +4,20 @@ import { RiVerifiedBadgeFill } from "react-icons/ri";
 import { FaClock, FaStar } from "react-icons/fa";
 import { BiSolidDollarCircle } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
+import { useAppContext } from "../context/contextAPI";
 
 interface AgentBoxProps {
   allowBorder: boolean;
-  type: "normal" | "subs";
-  data:any;
+  type: "normal" | "subs" | "nft";
+  data: any;
 }
 
-const AgentBox: FC<AgentBoxProps> = ({ allowBorder, type = "normal",data }) => {
-  console.log(data)
+const AgentBox: FC<AgentBoxProps> = ({
+  allowBorder,
+  type = "normal",
+  data,
+}) => {
+  const { setSelectedAgent, setEditNFT, loggedInUser } = useAppContext();
   const navigate = useNavigate();
   return (
     <figure
@@ -26,6 +31,16 @@ const AgentBox: FC<AgentBoxProps> = ({ allowBorder, type = "normal",data }) => {
           {data.category}
         </p>
       )}
+
+      {(type == "nft" || loggedInUser?._id == data.owner )&& (
+        <p
+          title="Agent Category"
+          className={styles.agent_type_tag}
+          style={{ marginLeft: "8px" }}
+        >
+          Owned
+        </p>
+      )}
       <div className={styles.agent_box}>
         <div className={styles.image_section}>
           <div className={styles.agent_image}>
@@ -37,11 +52,8 @@ const AgentBox: FC<AgentBoxProps> = ({ allowBorder, type = "normal",data }) => {
         </div>
         <figcaption className={styles.agent_caption}>
           <h4>
-
             {data.name}
-            <span>
-              {data.verified && <RiVerifiedBadgeFill />}
-            </span>
+            <span>{data.verified && <RiVerifiedBadgeFill />}</span>
           </h4>
           <p className={allowBorder ? styles.wrap_pera : ""}>
             {data.description}
@@ -68,23 +80,28 @@ const AgentBox: FC<AgentBoxProps> = ({ allowBorder, type = "normal",data }) => {
                   aria-label="Plan Type"
                   title="Plan Type"
                 >
-                  <BiSolidDollarCircle style={{ fontSize: "16px" }} /> {data.planType}
+                  <BiSolidDollarCircle style={{ fontSize: "16px" }} />{" "}
+                  {data.planType}
                 </span>
               </div>
 
               <span className={styles.total_used}>
-                Created by <span>{data?.owner?.username}</span>
+                Created by <span>{data?.creator?.username}</span>
               </span>
             </>
           ) : (
             <>
-              <Link
-              onClick={(e)=> e.stopPropagation()}
-                className={styles.see_usage}
-                to={`/subscriptions/agents/${data._id}`}
-              >
-                View Usage Details
-              </Link>
+              {type == "nft" ? (
+                <p className={styles.see_usage} onClick={(e)=> {e.stopPropagation();setEditNFT(true);setSelectedAgent(data)}}>Edit NFT Details</p>
+              ) : (
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  className={styles.see_usage}
+                  to={`/subscriptions/agents/${data._id}`}
+                >
+                  "View Usage Details"
+                </Link>
+              )}
             </>
           )}
         </figcaption>

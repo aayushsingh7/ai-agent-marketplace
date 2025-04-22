@@ -126,6 +126,17 @@ tr:nth-child(even) {
   font-size: 0.6rem;
 }
 
+.requestBody{
+  font-size: 0.57rem;
+  padding: 10px;
+  background: #efefef;
+  outline: none;
+  border: none;
+  width: 100%;
+  resize: none;
+  height: 150px;
+}
+
 .blocks{
   padding:10px;
   border-bottom: 2px solid #dfdfdf;

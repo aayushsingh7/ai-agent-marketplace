@@ -9,6 +9,7 @@ class AgentService {
   constructor() {
     this.agent = Agent;
     this.credit = UserCredit;
+    this.user = User;
   }
 
   async createAgent(agentData) {
@@ -22,7 +23,6 @@ class AgentService {
   }
 
   async searchAgent(query) {
-    console.log("---------------------------------------------", query);
     try {
       const agents = await this.agent
         .find({
@@ -43,12 +43,12 @@ class AgentService {
       return agents;
     } catch (err) {
       console.log(err);
-      throw new CustomError("Failed to search agents: " + err.message);
+      throw new CustomError("Fsailed to search agents: " + err.message);
     }
   }
 
   async getAgent(agentID) {
-    console.log("why the other fucking htis is triggering");
+s
     try {
       if (!mongoose.Types.ObjectId.isValid(agentID)) {
         throw new CustomError("Invalid Agent ID format", 400);
@@ -76,30 +76,75 @@ class AgentService {
     }
   }
 
-  async useAgent(creditID, agentID) {
+  async useAgent(creditID, agentID, requestType, userID) {
     try {
-      const userCredit = await this.credit.findOne({ _id: creditID });
-      if (!userCredit) throw new CustomError("User credit not found", 404);
+      if (requestType == "trail-use") {
+        const user = await this.user.findOne({ _id: userID });
+        if (!user) throw new CustomError("User not found", 404);
 
-      if (userCredit.creditsCostPerRequest > userCredit.totalCredits) {
-        throw new CustomError(
-          "No credits remaining, please buy more credits",
-          401
+        let freeTrailIndex = user.freeRequestsPerAgent.findIndex(
+          (agentDetail) => agentDetail.agentID == agentID
         );
+
+        // If the agent is not in the array, add it
+        if (freeTrailIndex === -1) {
+          user.freeRequestsPerAgent.push({
+            agentID,
+            request: 1,
+          });
+        } else {
+          // Check limit before incrementing
+          if (user.freeRequestsPerAgent[freeTrailIndex].request > 3)
+            throw new CustomError(
+              "Free usage limit exceeded, please buy credits"
+            );
+
+          // Increment the existing entry
+          user.freeRequestsPerAgent[freeTrailIndex].request += 1;
+        }
+
+        await user.save();
+        const agent = await this.agent.findOne({ _id: agentID });
+        if (!agent) throw new CustomError("Agent not found", 404);
+        return agent.deployedAPI;
+      } else if (requestType == "owner-privilage") {
+        let agent = await this.agent.findOne({ _id: agentID });
+        if (!agent) throw new CustomError("Agent not found", 404);
+        if (agent.owner != userID)
+          throw new CustomError("Owner Privilage is only for NFT Owner");
+        return agent.deployedAPI;
+      } else {
+        const userCredit = await this.credit.findOne({ _id: creditID });
+        if (!userCredit) throw new CustomError("User credit not found", 404);
+
+        if (userCredit.creditsCostPerRequest > userCredit.totalCredits) {
+          throw new CustomError(
+            "No credits remaining, please buy more credits",
+            401
+          );
+        }
+
+        userCredit.totalCredits -= userCredit.creditsCostPerRequest;
+        userCredit.creditsUsed += userCredit.creditsCostPerRequest;
+        await userCredit.save();
+
+        const agent = await this.agent.findOne({ _id: agentID });
+        if (!agent) throw new CustomError("Agent not found", 404);
+        return agent.deployedAPI;
       }
-
-      userCredit.totalCredits -= userCredit.creditsCostPerRequest;
-      userCredit.creditsUsed += userCredit.creditsCostPerRequest;
-      await userCredit.save();
-
-      const agent = await this.agent.findOne({ _id: agentID });
-      if (!agent) throw new CustomError("Agent not found", 404);
-
-      return agent.deployedAPI;
     } catch (err) {
       if (err instanceof CustomError) throw err;
       console.error("useAgent error:", err);
       throw new CustomError("Internal Server Error", 500);
+    }
+  }
+
+  async fetchOwnedNFTs(userID) {
+    try {
+      let nfts = await this.agent.find({ owner: userID });
+      return nfts;
+    } catch (err) {
+      throw new CustomError("Oops! something went wrong", 500);
     }
   }
 }

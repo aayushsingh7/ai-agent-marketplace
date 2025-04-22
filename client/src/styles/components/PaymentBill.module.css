@@ -1,0 +1,44 @@
+.section_four {
+  width: 30%;
+  /* background: pink; */
+  /* height: 80dvh; */
+}
+
+.section_four h4 {
+  font-size: 0.7rem;
+  padding: 10px;
+}
+
+.section_four_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.payment_box {
+  padding: 14px 20px 20px 20px;
+  background: #ebebff;
+  border-radius: 10px;
+}
+
+.payment h4 {
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+
+.blocks p{
+    padding: 5px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.6rem;
+  }
+  
+  .blocks{
+    padding:10px;
+    border-bottom: 2px solid #dfdfdf;
+  }
+  

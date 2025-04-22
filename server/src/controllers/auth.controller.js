@@ -27,7 +27,6 @@ class AuthController {
 
   async verifySignature(req, res) {
     try {
-      console.log(process.env.NODE_ENV == "development" ? false : true,)
       const result = await this.authService.verifySignature(req.query);
       res
         .cookie("seiagents", result.token, {
@@ -42,7 +41,6 @@ class AuthController {
           token: result.token,
         });
     } catch (err) {
-      console.log(err);
       res
         .status(err.statusCode || 500)
         .send({ success: false, message: err.message });
@@ -50,7 +48,7 @@ class AuthController {
   }
 
   async getLoggedInUser(req, res) {
-    console.log("getLoggedInUser", req.userID)
+
     try {
       const userData = await this.user.findOne({ _id: req.userID });
       res

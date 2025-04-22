@@ -12,129 +12,92 @@ import Button from "../components/ui/Button";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CheckBox from "../components/ui/CheckBox";
 import { useAppContext } from "../context/contextAPI";
+import { ethers } from "ethers";
+import PaymentBill from "../components/PaymentBill";
+import Notification from "../utils/notification";
 
 interface ViewAgentProps {}
 
 const ViewAgent: FC<ViewAgentProps> = ({}) => {
-  const { loggedInUser } = useAppContext();
+  const {
+    loggedInUser,
+    setSelectedAgent,
+    setShowBuyAgent,
+    setIsProcessing,
+    setProcessingDescription,
+    setProcessingText,
+  } = useAppContext();
   const [selectedSection, setSelectedSection] = useState<number>(1);
   const navigate = useNavigate();
   const [agentDetails, setAgentDetails] = useState<any>();
-  const [agree, setAgree] = useState<boolean>(false);
   const params = useParams();
   const [selectedLanguage, setSelectedLanguage] =
     useState<string>("Javascript");
-  const [fetchMethod, setFetchMethod] = useState<string>("Fetch");
   const [credits, setCredits] = useState<number>(100);
 
   const [userCredit, setUserCredit] = useState<any>({});
   const [customValue, setCustomValue] = useState<boolean>(false);
+  const [requestBody, setRequestBody] = useState(`{
+    prompt:"give me the current trading market anaylsis"
+    }`);
 
   const templateCode: any = {
     javascript: `
-  fetch("http://localhost:4000/api/v1/agents/use?agentID=${agentDetails?._id}", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-     "sei-agents-api-key": "${userCredit?.accessToken}"
-    },
-    credentials: "include"
-  })
-    .then(response => response.json())
-    .then(data => console.log(data))
-    .catch(error => console.error("Error:", error));
-    `,
-
-    java: `
-  import java.io.*;
-  import java.net.*;
-  import java.util.*;
-  
-  public class FetchExample {
-    public static void main(String[] args) throws Exception {
-      URL url = new URL("https://tiral-api-ai-gent.com");
-      HttpURLConnection con = (HttpURLConnection) url.openConnection();
-      con.setRequestMethod("GET");
-      con.setRequestProperty("Content-Type", "application/json");
-      con.setRequestProperty("Authorization", "Bearer YOUR_TOKEN");
-      con.setDoInput(true);
-  
-      BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-      String inputLine;
-      StringBuffer content = new StringBuffer();
-      while ((inputLine = in.readLine()) != null) {
-        content.append(inputLine);
-      }
-      in.close();
-      con.disconnect();
-  
-      System.out.println(content.toString());
-    }
-  }
-    `,
+      fetch("http://localhost:4000/api/v1/agents/use?agentID=${
+        agentDetails?._id
+      }", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "sei-agents-api-key": "${
+           loggedInUser?._id == agentDetails?.owner?._id ? "owner-privilage-" + loggedInUser?._id :  userCredit?.accessToken
+              ? userCredit?.accessToken
+              : "trail-use-" + loggedInUser?._id
+          }"
+        },
+        credentials: "include",
+        body: JSON.stringify(${requestBody})
+      })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error("Error:", error));
+      `,
 
     python: `
-  import requests
-  
-  url = "https://tiral-api-ai-gent.com"
-  headers = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer YOUR_TOKEN"
-  }
-  
-  response = requests.get(url, headers=headers, cookies={"session": "your_session_id"})
-  print(response.json())
-    `,
+      import requests
+      import json
+    
+      url = "http://localhost:4000/api/v1/agents/use?agentID=${
+        agentDetails?._id
+      }"
+    
+      headers = {
+        "Content-Type": "application/json",
+        "sei-agents-api-key": "${
+         loggedInUser?._id == agentDetails?.owner?._id ? "owner-privilage-" + loggedInUser?._id :  userCredit?.accessToken
+            ? userCredit?.accessToken
+            : "trail-use-" + loggedInUser?._id
+        }"
+      }
+    
+      response = requests.post(
+        url,
+        headers=headers,
+        cookies={"session": "your_session_id"},
+        data=json.dumps(${requestBody})
+      )
+    
+      print(response.json())
+      `,
   };
 
-  const response: string = `
-{
-  "agentId": "ai-9283746",
-  "name": "Nova",
-  "model": "GPT-5.2",
-  "version": "5.2.0-beta",
-  "createdAt": "2025-03-15T10:25:43Z",
-  "capabilities": {
-    "languageUnderstanding": true,
-    "multilingualSupport": ["en", "es", "fr", "de", "zh", "hi"],
-    "imageProcessing": true,
-    "codeGeneration": true,
-    "emotionalRecognition": false
-  },
-  "settings": {
-    "temperature": 0.7,
-    "maxTokens": 2048,
-    "responseDelay": "150ms",
-    "safetyMode": "strict"
-  },
-  "status": {
-    "online": true,
-    "currentTasks": [
-      {
-        "taskId": "task-8891",
-        "type": "summarization",
-        "assignedAt": "2025-04-13T08:00:00Z"
-      },
-      {
-        "taskId": "task-8892",
-        "type": "codeReview",
-        "assignedAt": "2025-04-13T08:15:00Z"
-      }
-    ]
-  },
-  "owner": {
-    "name": "Aayush Singh",
-    "email": "aayush@example.com",
-    "organization": "NextWave AI Labs"
-  }
-}
-`;
+  useEffect(() => {
+    fetchAgentDetails(params.agentID || "");
+  }, []);
 
   useEffect(() => {
-    console.log("fetched agent details", params.agentID);
-    fetchAgentDetails(params.agentID || "");
     fetchUserCredit();
-  }, []);
+  }, [loggedInUser, agentDetails]);
 
   const fetchAgentDetails = async (agentID: string) => {
     try {
@@ -143,85 +106,185 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       );
       const data = await response.json();
       setAgentDetails(data.data);
+      setSelectedAgent(data.data);
     } catch (err) {
-      console.log(err);
+      Notification.error("Oops! something went wrong while fetching agents");
     }
   };
 
   const fetchUserCredit = async () => {
+    if (!loggedInUser?._id) return;
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/users/${loggedInUser._id}/agents/${
+        `${import.meta.env.VITE_API_URL}/users/${loggedInUser?._id}/agents/${
           agentDetails._id
-        }/user-credit`,{
-          credentials:"include"
+        }/user-credit`,
+        {
+          credentials: "include",
         }
       );
       const credit = await response.json();
       setUserCredit(credit.data);
     } catch (err) {
-      console.error(err);
     }
   };
 
-  const buyAgentNFT = async () => {
-    try {
-      const request = await fetch(
-        `${import.meta.env.VITE_API_URL}/wallets/buy-nft`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            agentID: "6804f5c541723a1a95aaed62",
-            tokenID: "5",
-          }),
-          credentials: "include",
-        }
-      );
-      const response = await request.json();
-      console.log(response);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+ 
+  const [error, setError] = useState("");
+  const [txHash, setTxHash] = useState("");
+  const [tryAgentResponse, setTryAgentResponse] = useState<string>("");
+
 
   const buyCredits = async () => {
+  
+    //@ts-ignore
+    if (!window.ethereum) {
+      Notification.error(
+        "MetaMask is not installed. Please install it to use this app."
+      );
+      setError("MetaMask is not installed. Please install it to use this app.");
+      return;
+    }
+
     try {
-      const request = await fetch(
-        `${import.meta.env.VITE_API_URL}/wallets/buy-credits`,
+      setProcessingText("Preparing Transaction...");
+      setIsProcessing(true);
+      setError("");
+
+      // Get the user's wallet
+      //@ts-ignore
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+
+      const balance = await signer.provider.getBalance(
+        loggedInUser?.walletAddress
+      );
+   
+      // Step 1: Get transaction data from backend
+      const prepareResponse = await fetch(
+        `${import.meta.env.VITE_API_URL}/wallets/prepare-buy-credits`,
         {
-          method: "PUT",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tokenId: "3",
+            agentID: agentDetails._id,
+            tokenID: "7",
             creditAmount: credits,
-            agentID: "6804f5c541723a1a95aaed62",
+            walletAddress: address,
           }),
           credentials: "include",
         }
       );
-      let response = await request.json();
-      console.log(response);
-    } catch (err) {
-      console.log(err);
+
+      if (!prepareResponse.ok) {
+        const data = await prepareResponse.json();
+        Notification.error(data.message || "Failed to prepare transaction");
+        setIsProcessing(false);
+        return;
+      }
+
+      const txData = await prepareResponse.json();
+
+    
+
+      // Debug: Check actual credit cost in contract
+      const contract = new ethers.Contract(
+        txData.data.contractAddress,
+        txData.data.contractABI,
+        signer
+      );
+
+      // Get the actual credit cost from contract for verification
+      const actualCreditCost = await contract.getAgentCreditCost("7");
+
+      // IMPORTANT: Calculate the total cost based on the contract's actual credit cost
+      const totalCostWei = BigInt(actualCreditCost) * BigInt(credits);
+
+      setProcessingText("Executing The Transaction...");
+      // Execute the transaction with the correct value based on contract's credit cost
+      const tx = await contract[txData.data.method](...txData.data.params, {
+        value: totalCostWei, // Use the cost from the contract, not from backend
+      });
+
+      setTxHash(tx.hash);
+
+      // Step 4: Wait for confirmation
+      const receipt = await tx.wait();
+      const gasUsed = receipt.gasUsed;
+      const gasPrice = receipt.gasPrice || receipt.effectiveGasPrice;
+
+      // Calculate the total gas fee
+      const gasFee = gasUsed * gasPrice;
+
+      // Convert to a more readable format if needed
+      const gasFeeInEth = ethers.formatEther(gasFee);
+
+
+      // Step 5: Inform backend of successful purchase
+      setProcessingText("Confirming The Transaction...");
+      const confirmResponse = await fetch(
+        `${import.meta.env.VITE_API_URL}/wallets/confirm-credit-purchase`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            transactionHash: receipt.hash,
+            agentID: agentDetails._id,
+            tokenID: "7",
+            creditAmount: credits,
+            walletAddress: address,
+            gasFee: gasFee.toString(),
+            gasFeeInEth: gasFeeInEth,
+          }),
+          credentials: "include",
+        }
+      );
+
+      if (!confirmResponse.ok) {
+        const data = await confirmResponse.json();
+        Notification.error("Failed to confirm purchase");
+        setIsProcessing(false);
+        return;
+      }
+
+      const result = await confirmResponse.json();
+      Notification.success("Credit purchased successfully");
+    } catch (err: any) {
+      if (err.code === "CALL_EXCEPTION" && err.action === "estimateGas") {
+        Notification.error(
+          "Transaction failed — possibly due to insufficient funds or invalid input."
+        );
+      } else {
+        const revertMessage = err?.revert?.args?.[0];
+        console.error("Main revert message:", revertMessage);
+        Notification.error(revertMessage);
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
-
   const tryAgent = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/use?agentID=${agentDetails?._id}`,
+        `${import.meta.env.VITE_API_URL}/agents/use?agentID=${
+          agentDetails?._id
+        }`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "sei-agents-api-key": userCredit.accessToken,
+            "sei-agents-api-key":loggedInUser?._id == agentDetails?.owner?._id ? "owner-privilage-" + loggedInUser?._id :  userCredit?.accessToken
+              ? userCredit?.accessToken
+              : "trail-use-" + loggedInUser?._id,
           },
           credentials: "include",
         }
       );
-    } catch (err) {
-      console.error(err);
+      const data = await response.json();
+      setTryAgentResponse(data);
+    } catch (err: any) {
+      Notification.error(err.message);
     }
   };
 
@@ -253,10 +316,16 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                   />
 
                   <div className={styles.agent_option}>
-                    <Button onClick={() => setSelectedSection(3)}>
-                      Rent Agent
-                    </Button>
-                    <Button onClick={buyAgentNFT}>Buy NFT</Button>
+                    {agentDetails.status == 1 && (
+                      <Button onClick={() => setSelectedSection(3)}>
+                        Rent Agent
+                      </Button>
+                    )}
+                    {agentDetails.isForSale && (
+                      <Button onClick={() => setShowBuyAgent(() => true)}>
+                        Buy NFT
+                      </Button>
+                    )}
                   </div>
 
                   <div className={styles.more_details}>
@@ -279,8 +348,16 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                             <td>{agentDetails.purpose}</td>
                           </tr>
                           <tr>
-                            <td>Owner:</td>
-                            <td>Maria Anders</td>
+                            <td>Is Agent For Sale:</td>
+                            <td>{agentDetails.isForSale}</td>
+                          </tr>
+                          <tr>
+                            <td>Agent Sale Price:</td>
+                            <td>{agentDetails.salePrice}</td>
+                          </tr>
+                          <tr>
+                            <td>Owner Username:</td>
+                            <td>{agentDetails.owner.username || "N/A"}</td>
                           </tr>
                           <tr>
                             <td>Trained On:</td>
@@ -507,25 +584,29 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                     <DropDown
                       changeDefaultValue={setSelectedLanguage}
                       defaultValue={selectedLanguage}
-                      valuesList={["Javascript", "Java", "Python"]}
+                      valuesList={["Javascript", "Python"]}
                     />
-                    {/* <DropDown
-                changeDefaultValue={setFetchMethod}
-                defaultValue={fetchMethod}
-                valuesList={["Fetch", "Axios"]}
-              /> */}
-                    <Button>Send Request</Button>
+                    <Button onClick={tryAgent}>Send Request</Button>
                   </div>
 
                   <div className={styles.code_highlighter}>
                     <h4>Request Code</h4>
                     <SyntaxHighlighter
                       customStyle={{ fontSize: "14px" }}
-                      language="javascript"
+                      language={selectedLanguage.toLowerCase()}
                       style={docco}
                     >
                       {templateCode[`${selectedLanguage.toLowerCase()}`]}
                     </SyntaxHighlighter>
+                  </div>
+
+                  <div className={styles.code_highlighter}>
+                    <h4>Requeset Body</h4>
+                    <textarea
+                      value={requestBody}
+                      className={styles.requestBody}
+                      onChange={(e) => setRequestBody(e.target.value)}
+                    ></textarea>
                   </div>
 
                   <div className={styles.code_highlighter}>
@@ -535,78 +616,20 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                       language="javascript"
                       style={docco}
                     >
-                      {response}
+                      {tryAgentResponse?.length == 0
+                        ? "// Response will appear here"
+                        : JSON.stringify(tryAgentResponse)}
                     </SyntaxHighlighter>
                   </div>
                 </section>
               ) : (
-                <section className={`${styles.section_four} ${styles.payment}`}>
-                  <div className={styles.payment_box}>
-                    <h4>Payment Summary</h4>
-                    <div className={styles.blocks}>
-                      <p>
-                        <span>Total Credits:</span> <strong>{credits}</strong>
-                      </p>
-                      <p>
-                        <span>Cost Per Credit:</span>{" "}
-                        <strong>
-                          {agentDetails.rentingDetails.costPerCredit} SEI
-                        </strong>
-                      </p>
-                    </div>
-                    <div className={styles.blocks}>
-                      <p>
-                        <span>Blockchain:</span> <strong>$SEI</strong>
-                      </p>
-                    </div>
-                    <div className={styles.blocks}>
-                      <p>
-                        <span>Total:</span>{" "}
-                        <strong>
-                          ${agentDetails.rentingDetails.costPerCredit * credits}
-                        </strong>
-                      </p>
-                      <p>
-                        <span>Gas Fee:</span> <strong>$0.00224 WSI</strong>
-                      </p>
-                    </div>
-                    <div className={styles.blocks}>
-                      <p>
-                        <strong>GRAND TOTAL:</strong>{" "}
-                        <strong>
-                          $
-                          {agentDetails.rentingDetails.costPerCredit * credits +
-                            0.00224}
-                        </strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <CheckBox
-                      description={
-                        "By checking it, you agree that the money will be deducted from your metamask wallet automatically"
-                      }
-                      changeCheckBoxStatus={setAgree}
-                      checkBoxStatus={agree}
-                      text="Confirm Payment"
-                    />
-                    <Button
-                      onClick={buyCredits}
-                      style={{
-                        fontSize: "0.8rem",
-                        padding: "15px 20px",
-                        width: "100%",
-                        color: "#ffffff",
-                        background: "#b30000",
-                        borderRadius: "5px",
-                        marginTop: "10px",
-                      }}
-                    >
-                      Proceed to Pay via MetaMask
-                    </Button>
-                  </div>
-                </section>
+                <PaymentBill
+                  type="credit"
+                  width="30%"
+                  func={buyCredits}
+                  agent={agentDetails}
+                  creditAmount={credits}
+                />
               )}
             </div>
           </Page>

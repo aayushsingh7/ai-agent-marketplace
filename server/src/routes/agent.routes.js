@@ -9,6 +9,7 @@ agentRoutes.get("/", agentController.getAgents)
 agentRoutes.get("/agent/:agentID", agentController.getAgent);
 agentRoutes.get("/search", agentController.searchAgents);
 agentRoutes.post("/create",authenticateUser, agentController.createAgent);
-agentRoutes.get("/use", validateAgentAccessToken,agentController.useAgentAPI); 
+agentRoutes.post("/use", validateAgentAccessToken,agentController.useAgentAPI); 
+agentRoutes.get("/nfts", authenticateUser, agentController.fetchOwnedNFTs)
 
 export default agentRoutes;

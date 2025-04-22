@@ -44,10 +44,10 @@ class UserService {
   async fetchSubscriptions(userID) {
     try {
       const results = await this.credits
-        .find({ user: userID })
+        .find({ user: userID , owner:userID})
         .populate({
           path: "agent",
-          select: "name description category verified",
+          select: "name description category verified walletAddress",
         })
         .select("agent");
 
@@ -57,6 +57,7 @@ class UserService {
       throw new CustomError("Oops something went wrong", 500);
     }
   }
+  
 
   
 }

@@ -9,11 +9,12 @@ import MarkdownPreview from "@uiw/react-markdown-preview";
 import { useAppContext } from "../context/contextAPI";
 import { useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
+import Notification from "../utils/notification";
 
 interface UploadProps {}
 
 const Upload: FC<UploadProps> = ({}) => {
-  const { loggedInUser } = useAppContext();
+  const { loggedInUser,setIsProcessing,setProcessingText } = useAppContext();
   const navigate = useNavigate()
 
   const [markdownText, setMarkdownText] = useState<string>(``);
@@ -36,9 +37,11 @@ const Upload: FC<UploadProps> = ({}) => {
   const [isForSale, setIsForSale] = useState<boolean>(false);
   const [agentSalePrice, setAgentSalePrice] = useState<number>(0);
   const [creditCostPerReq, setCreditCostPerReq] = useState<number>(1);
-  const [costPerCredit, setCostPerCredit] = useState<number>(0.1);
+  const [costPerCredit, setCostPerCredit] = useState<number>(0.001);
 
   const createAgent = async () => {
+    setIsProcessing(true)
+    setProcessingText("Uploading the Agent...")
     try {
       const data = {
         name: agentName,
@@ -46,14 +49,14 @@ const Upload: FC<UploadProps> = ({}) => {
         category: category,
         mintOnBlockchain: true,
         planType: agentPlanType,
-        owner: "",
-        creator: "",
+        owner: loggedInUser?.walletAddress,
+        creator:loggedInUser?.walletAddress,
         purpose: agentPurpose,
         trainedOn: trainedOn,
         tags: tags,
         status: agentStatus == "Available" ? 1 : 0,
         usageLicense: usageLicense,
-        isForSale: true,
+        isForSale: isForSale,
         salePrice: agentSalePrice,
         documentation: markdownText,
         deployedAPI: deployedURL,
@@ -63,8 +66,7 @@ const Upload: FC<UploadProps> = ({}) => {
         },
       };
 
-      console.log(data);
-
+      
       const upload = await fetch(
         `${import.meta.env.VITE_API_URL}/wallets/mint`,
         {
@@ -72,14 +74,19 @@ const Upload: FC<UploadProps> = ({}) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             agentData: data,
-            recipient: "0x716d3DAde4C4CF4374A54F9A9d388850e739c5E2",
+            recipient: loggedInUser?.walletAddress,
           }),
+          credentials:"include"
         }
       );
       const response = await upload.json();
-      console.log(response);
-    } catch (err) {
-      console.error(err);
+      if(upload.ok) {
+      Notification.success("New agent created successfully")
+      }
+    } catch (err:any) {
+      Notification.error(err.message)
+    }finally{
+      setIsProcessing(false)
     }
   };
 
@@ -259,15 +266,15 @@ const Upload: FC<UploadProps> = ({}) => {
 
                 {isForSale && (
                   <div className={styles.input_field}>
-                    <span>Enter Agent Selling Price ($)</span>
+                    <span>Enter Agent Selling Price ($SEI Token QTY)</span>
                     <Input
                       onChange={(e) =>
                         setAgentSalePrice(parseInt(e.target.value))
                       }
                       placeholder=""
                       type="number"
-                      min={5}
-                      max={100000}
+                      min={1}
+                      max={1000}
                       step={1}
                       defaultValue={5}
                     />
@@ -286,7 +293,7 @@ const Upload: FC<UploadProps> = ({}) => {
                   <span>Owner Wallet Address</span>
                   <Input
                     placeholder=""
-                    value={"sei19qfqe50993403320r0952039j"}
+                    value={loggedInUser?.walletAddress}
                   />
                 </div>
 
@@ -294,7 +301,7 @@ const Upload: FC<UploadProps> = ({}) => {
                   <span>Creator Wallet Address</span>
                   <Input
                     placeholder=""
-                    value={"sei19qfqe50993403320r0952039j"}
+                    value={loggedInUser?.walletAddress}
                   />
                 </div>
               </section>
@@ -307,7 +314,7 @@ const Upload: FC<UploadProps> = ({}) => {
                   </span>
                   <Input
                     //  value={costPerCredit}
-                    onChange={(e) => setCostPerCredit(parseInt(e.target.value))}
+                    onChange={(e) => setCostPerCredit(parseFloat(e.target.value))}
                     type="number"
                     min={0.001}
                     max={0.08}
@@ -323,7 +330,7 @@ const Upload: FC<UploadProps> = ({}) => {
                   <Input
                     // value={creditCostPerReq}
                     onChange={(e) =>
-                      setCreditCostPerReq(parseInt(e.target.value))
+                      setCreditCostPerReq(parseFloat(e.target.value))
                     }
                     type="number"
                     min={0.1}
@@ -365,11 +372,11 @@ const Upload: FC<UploadProps> = ({}) => {
               />
             )}
             {formSection == 0 ? (
-              <Button onClick={() => setFormSection(1)}>Next</Button>
+              <Button className={styles.nor_button} onClick={() => setFormSection(1)}>Next</Button>
             ) : (
               <>
-                <Button onClick={() => setFormSection(0)}>Prev</Button>{" "}
-                <Button onClick={createAgent}>Submit for Review</Button>
+                <Button className={styles.nor_button} onClick={() => setFormSection(0)}>Prev</Button>{" "}
+                {confirmSubmission && <Button className={styles.main_button} onClick={createAgent} disabled={!confirmSubmission}>Submit for Review</Button>}
               </>
             )}
           </div>

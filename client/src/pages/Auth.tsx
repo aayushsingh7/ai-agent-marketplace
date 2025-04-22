@@ -3,11 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import Page from "../components/Page";
 import Button from "../components/ui/Button";
 import { useAppContext } from "../context/contextAPI";
+import Notification from "../utils/notification";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Auth = () => {
-  const {loggedInUser,setLoggedInUser} = useAppContext()
+  const {loggedInUser,setLoggedInUser, setVerifyUser} = useAppContext()
   const [walletAddress, setWalletAddress] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState("");
@@ -95,7 +96,7 @@ const Auth = () => {
       });
       
       console.log("Connected accounts:", accounts);
-      const address = accounts[0];
+      const address = accounts[1];
       setWalletAddress(address);
       
       // Once we have the address, we can try to switch networks
@@ -167,13 +168,14 @@ const Auth = () => {
       if (authData.token) {
         localStorage.setItem('authToken', authData.token);
         navigate('/marketplace');
+        setVerifyUser(true)
+        Notification.success("Wallet connected successfully")
         setLoggedInUser(()=> authData.data)
       } else {
         throw new Error('No authentication token received');
       }
     } catch (err:any) {
-      console.error("Login error:", err);
-      setError(`Login failed: ${err.message}`);
+      Notification.error(err.message)
       setIsConnecting(false);
     }
   };

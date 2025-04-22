@@ -10,6 +10,7 @@ class AgentController {
     this.createAgent = this.createAgent.bind(this);
     this.getAgent = this.getAgent.bind(this);
     this.getAgents = this.getAgents.bind(this);
+    this.fetchOwnedNFTs = this.fetchOwnedNFTs.bind(this);
   }
 
   async getAgents(req, res) {
@@ -30,7 +31,6 @@ class AgentController {
         data: results,
       });
     } catch (err) {
-      console.log(err);
       res
         .status(500)
         .send({ success: false, message: "Oops! something went wrong" });
@@ -39,7 +39,6 @@ class AgentController {
   async searchAgents(req, res) {
     try {
       const { query } = req.query;
-      console.log("--------------------------------searchagents", query);
       const results = await this.agentService.searchAgent(query);
       res.status(200).send({
         success: true,
@@ -93,23 +92,41 @@ class AgentController {
         .send({ success: false, message: "agentID is required" });
     }
 
-    if (!apiKey) {
+    if (!req.userID)
       return res
-        .status(401)
-        .send({ success: false, message: "Access key missing" });
-    }
+        .status(400)
+        .send({ success: false, message: "User ID is not provided" });
 
     try {
       const originalAPI = await this.agentService.useAgent(
         req.creditID,
-        agentID
+        agentID,
+        req.requestType,
+        req.userID
       );
-      return res.status(200).redirect(originalAPI);
+      return res.redirect(originalAPI);
     } catch (err) {
-      res.status(err.statusCode).send({
+      res.status(err.statusCode || 500).send({
         success: false,
         message: err.message,
       });
+    }
+  }
+
+  async fetchOwnedNFTs(req, res) {
+    try {
+      const nfts = await this.agentService.fetchOwnedNFTs(req.userID);
+      res
+        .status(200)
+        .send({
+          success: true,
+          message: "NFTs fetched successfully",
+          data: nfts,
+        });
+    } catch (err) {
+      res
+        .status(err.statusCode || 500)
+        .send({ success: false, message: err.message });
     }
   }
 }

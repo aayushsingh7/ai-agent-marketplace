@@ -8,5 +8,6 @@ userRoutes.get("/:userID",authenticateUser,userController.getUserData);
 userRoutes.put("/:userID/edit",authenticateUser ,userController.updateUserInfo)
 userRoutes.get("/:userID/subscriptions",authenticateUser, userController.fetchSubscriptions)
 userRoutes.get("/:userID/agents/:agentID/user-credit", authenticateUser,userController.getUserCredit)
+userRoutes.delete("/logout", userController.logout)
 
 export default userRoutes;

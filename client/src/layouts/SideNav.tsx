@@ -14,20 +14,20 @@ const SideNav: FC<SideNavProps> = ({ type, setTab, selectedTab }) => {
   const [selectedRoute, setSelectedRoute] = useState("/");
   const navigate = useNavigate();
 
-
   useEffect(() => {
     setSelectedRoute(location.pathname);
   }, [location.pathname]);
 
   return (
     <nav className={`${styles.sidenav} ${styles.show} ${styles[type]}`}>
-      <div>
+      <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
         <h2
           onClick={() => navigate("/marketplace")}
           style={{ cursor: "pointer" }}
         >
           Sei<span>Agents</span>
         </h2>
+        <div className={styles.seprator}>
         {selectedRoute.startsWith("/marketplace/agents") ? (
           <ul>
             <li
@@ -68,25 +68,49 @@ const SideNav: FC<SideNavProps> = ({ type, setTab, selectedTab }) => {
                   : "#ffffff",
               }}
             >
-              <Link to={loggedInUser?._id ? "/subscriptions" : "/auth"}>Subscriptions</Link>
+              <Link to={loggedInUser?._id ? "/subscriptions" : "/auth"}>
+                Subscriptions
+              </Link>
+            </li>
+            <li
+              style={{
+                background: selectedRoute == "/nfts" ? "#efefef" : "#ffffff",
+              }}
+            >
+              <Link to={loggedInUser?._id ? "/nfts" : "/auth"}>
+                Owned NFTs
+              </Link>
             </li>
             <li
               style={{
                 background: selectedRoute == "/upload" ? "#efefef" : "#ffffff",
               }}
             >
-              <Link to={loggedInUser?._id ? "/upload" : "/auth"}>Upload Agent</Link>
-            </li>
-            <li
-              style={{
-                background:
-                  selectedRoute == "/settings" ? "#efefef" : "#ffffff",
-              }}
-            >
-              <Link to="/settings">Setting</Link>
+              <Link to={loggedInUser?._id ? "/upload" : "/auth"}>
+                Upload Agent
+              </Link>
             </li>
           </ul>
         )}
+
+        <ul>
+          <li
+            style={{
+              background: selectedRoute == "/settings" ? "#efefef" : "#ffffff",
+            }}
+          >
+            <Link to="/settings">Setting</Link>
+          </li>
+
+          <li
+            style={{
+              background: selectedRoute == "/logout" ? "#efefef" : "#ffffff",
+            }}
+          >
+            <Link to="/logout">Logout</Link>
+          </li>
+        </ul>
+        </div>
       </div>
     </nav>
   );

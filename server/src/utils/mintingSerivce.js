@@ -6,8 +6,6 @@ dotenv.config();
 const privateKey = process.env.MINTER_PRIVATE_KEY;
 const rpcUrl = process.env.RPC_URL;
 
-// console.log(privateKey)
-
 if (!privateKey || !rpcUrl) {
   throw new Error("Missing private key or RPC URL");
 }

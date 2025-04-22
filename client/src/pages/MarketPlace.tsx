@@ -4,7 +4,9 @@ import Input from "../components/ui/Input";
 import styles from "../styles/pages/MarketPlace.module.css";
 import AgentBox from "../components/AgentBox";
 import { useLocation, useNavigate } from "react-router-dom";
-import searchAgents from "../utils/searchAgents";
+import Loading from "../components/Loading";
+import NotFound from "../components/NotFound";
+import Notification from "../utils/notification";
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -18,6 +20,7 @@ const MarketPlace: FC<MarketPlaceProps> = ({}) => {
   const query = useQuery();
   const searchQuery = query.get("search") || "";
   const [agents, setAgents] = useState([]);
+  const [loading,setLoading] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -26,7 +29,7 @@ const MarketPlace: FC<MarketPlaceProps> = ({}) => {
         const data = await response.json();
         setAgents(data.data);
       } catch (err) {
-        console.log(err);
+       Notification.error("Oops! something went wrong while fetching agents")
       }
     };
 
@@ -34,8 +37,22 @@ const MarketPlace: FC<MarketPlaceProps> = ({}) => {
   }, []);
 
   useEffect(() => {
-    // @ts-ignore
-    setSearchData(searchAgents(searchQuery, navigate));
+    const getSearchResults = async () => {
+      try {
+        if (searchQuery === "") navigate("/marketplace");
+        setLoading(true)
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/agents/search?query=${searchQuery}`
+        );
+        const data = await res.json();
+        setSearchData(data.data);
+      } catch (err) {
+        Notification.error("Oops! something went wrong while fetching search results")
+        return null;
+      }
+      setLoading(false)
+    };
+    getSearchResults();
   }, [searchQuery]);
 
   return (
@@ -47,12 +64,14 @@ const MarketPlace: FC<MarketPlaceProps> = ({}) => {
         }
         placeholder="Search Agents (eg: Booking agents, Trading agents, etc..)"
       />
-      {searchData.length > 0 ? (
-        <section className={styles.agents_container}>
-          {searchData.map((agent) => {
-            return <AgentBox data={agent} type="normal" allowBorder={true} />;
-          })}
-        </section>
+      {loading ? <Loading/> : searchQuery.length > 0 ? (
+        searchData?.length <= 0 ?<NotFound text="Nothing Found 👀"/> : (
+          <section className={styles.agents_container}>
+            {searchData?.map((agent) => {
+              return <AgentBox data={agent} type="normal" allowBorder={true} />;
+            })}
+          </section>
+        )
       ) : (
         <section className={styles.agents_container}>
           {agents.map((agent) => {

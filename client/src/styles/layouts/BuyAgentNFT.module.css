@@ -1,0 +1,49 @@
+.rgba_background{
+    width: 100vw;
+    height: 100dvh;
+    background:rgba(0, 0, 0, 0.461);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0%;
+    bottom: 0%;
+}
+
+.buy_agent_box{
+    max-width: 1300px;
+    width: 90%;
+    padding: 20px;
+    border-radius: 10px;
+    background: #ffffff;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 600px;
+}
+
+.rgba_background h4{
+    margin-top: 20px;
+    font-size: 0.6rem;
+}
+
+.buy_agent_box h2{
+    font-size: 0.8rem;
+    margin-bottom: 40px;
+}
+.agent_details{
+    width: 70%;
+    overflow-y: scroll;
+    height: 100%;
+}
+
+.details{
+    margin-left: 60px;
+    font-size: 0.6rem;
+    padding: 15px 0px;
+}
+
+.details .price{
+    font-weight: 600;
+}
