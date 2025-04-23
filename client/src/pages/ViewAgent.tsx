@@ -96,7 +96,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
   }, []);
 
   useEffect(()=> {
-    setRequestBody(JSON.stringify(agentDetails?.requestBody))
+    setRequestBody(agentDetails?.requestBody)
   },[agentDetails])
 
   useEffect(() => {

@@ -99,7 +99,7 @@ const SideNav: FC<SideNavProps> = ({ type, setTab, selectedTab }) => {
               background: selectedRoute == "/settings" ? "#efefef" : "#ffffff",
             }}
           >
-            <Link to="/settings">Setting</Link>
+            <Link to="/account-info">Account Info</Link>
           </li>
 
           <li

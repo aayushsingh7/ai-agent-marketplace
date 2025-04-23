@@ -5,7 +5,6 @@ import MarketPlace from "./pages/MarketPlace";
 import ViewAgent from "./pages/ViewAgent";
 import Subscription from "./pages/Subscription";
 import Upload from "./pages/Upload";
-import Settings from "./pages/Settings";
 import SideNav from "./layouts/SideNav";
 import Auth from "./pages/Auth";
 import Usage from "./pages/Usage";
@@ -16,6 +15,7 @@ import Processing from "./components/Processing";
 import Logout from "./pages/Logout";
 import MyNFTs from "./pages/MyNFTs";
 import EditNFT from "./components/EditNFT";
+import AccountInfo from "./pages/AccountInfo";
 
 interface AppProps {}
 
@@ -48,11 +48,11 @@ const App: FC<AppProps> = ({}) => {
           }
         />
         <Route
-          path="/settings"
+          path="/account-info"
           element={
             <div className="flex-page">
               <SideNav type="normal" />
-              <Settings />
+              <AccountInfo />
             </div>
           }
         />

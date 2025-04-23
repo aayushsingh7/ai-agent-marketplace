@@ -52,7 +52,7 @@ const Subscription: FC<SubscriptionProps> = ({}) => {
           <section className={styles.agents_container}>
             {subscriptions.map((data) => (
               <AgentBox
-                key={data.agent.id}
+                key={data?.agent?._id}
                 data={data.agent}
                 allowBorder={true}
                 type="subs"

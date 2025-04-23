@@ -1,13 +1,13 @@
 import { FC, useEffect, useState } from "react";
 import Page from "../components/Page";
-import styles from "../styles/pages/Settings.module.css";
+import styles from "../styles/pages/AccountInfo.module.css";
 import Input from "../components/ui/Input";
 import { useAppContext } from "../context/contextAPI";
 import Button from "../components/ui/Button";
 
-interface SettingsProps {}
+interface AccountInfoProps {}
 
-const Settings: FC<SettingsProps> = ({}) => {
+const AccountInfo: FC<AccountInfoProps> = ({}) => {
   const {loggedInUser}= useAppContext()
   const [name,setName] = useState<string>()
   const [username,setUsername] = useState<string>()
@@ -19,17 +19,10 @@ const Settings: FC<SettingsProps> = ({}) => {
 
   return (
     <Page>
-      <div className={styles.settings}>
-          <h3>Settings</h3>
+      <div className={styles.accountInfo}>
+          <h3>Account Info</h3>
         <section className={styles.form_section}>
-          <div className={styles.input_field}>
-            <span>Your Name</span>
-            <Input
-              placeholder="Enter Your Name"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-            />
-          </div>
+        
 
           <div className={styles.input_field}>
             <span>Your Username</span>
@@ -49,11 +42,11 @@ const Settings: FC<SettingsProps> = ({}) => {
             <p>To change this address, logout & use another wallet to sign in.</p>
           </div>
 
-          <Button>Save Changes</Button>
+
         </section>
       </div>
     </Page>
   );
 };
 
-export default Settings;
+export default AccountInfo;
