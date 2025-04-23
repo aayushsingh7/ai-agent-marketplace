@@ -117,10 +117,11 @@ git clone https://github.com/aayushsingh7/ai-agent-marketplace.git
 
 ### 8.2 Project Structure
 
-After cloning, you’ll find two main directories:
+After cloning, you’ll find three main directories:
 
 - `client/` – Frontend (React)
 - `server/` – Backend (Node.js + Smart Contract interaction)
+- `smart-contract/` - Smart Contract [Dedicated README.md](https://github.com/aayushsingh7/ai-agent-marketplace/tree/main/smart-contract#ai-agent-marketplace-smart-contract])
 
 ---
 
