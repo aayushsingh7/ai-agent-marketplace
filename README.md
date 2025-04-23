@@ -1,31 +1,42 @@
-# 🤖 Decentralized AI Agent Marketplace on SEI
-### Empowering AI creators & users through crypto-native access
-
----
-
-## 🔍 1. The Problem  
-
-AI is reshaping the world, but access remains centralized and unfair:
-
-- 🏦 Centralized platforms control AI distribution and monetization  
-- 💡 Independent developers struggle to earn from their AI creations  
-- 🔒 No **decentralized**, **transparent**, or **crypto-native** system exists to discover and use AI tools
-
+# 🤖 SeiAgent – Decentralized AI Agent Marketplace on SEI  
+### Empowering AI creators & users through crypto-native ownership & access
 
 ---
 
 <br>
 
+## 🔗 Live Demo  
+
+Watch the full demo (includes problem, solution, and presentation):  
+**[https://youtu.be/Q0pQrhaVph8?si=XnzXw6Gt_fdeZlgr](https://youtu.be/Q0pQrhaVph8?si=XnzXw6Gt_fdeZlgr)**
+
+---
+
+<br>
+
+## 🔍 1. The Problem  
+
+The AI revolution is accelerating — but access remains monopolized and fragmented:
+
+- 🏦 Centralized tech giants dominate AI distribution and monetization  
+- 🚫 Indie developers struggle to profit or gain visibility for their innovations  
+- 🔐 No open, decentralized, or crypto-native framework exists to truly **own**, **trade**, or **access** AI
+
+> 🌐 We're stuck in a Web2 paradigm trying to build Web3 intelligence.
+
+---
+
+<br>
 
 ## 💡 2. The Solution  
 
-SeiAgents - A decentralized platform where users can **rent or own AI agents** using $SEI on the **Sei blockchain**:
+**SeiAgent** – A decentralized platform where users can **rent, own, or trade AI agents** using $SEI on the Sei blockchain:
 
-- 💳 Users **purchase credits via smart contracts** to interact with AI agents (e.g., access APIs, generate content)  
-- 🧠 Developers list AI agents, which users can **buy as NFTs** to own exclusive or enhanced access  
-- 🔐 Access to agents is granted after on-chain verification, while the agents run off-chain for speed and scalability  
+- 💳 **Smart contract-based credit system** lets users access AI (e.g., APIs, generators, models)  
+- 🧠 Developers mint their AI agents as **NFTs**, enabling tradable, ownable access  
+- 🔐 Agent access is validated **on-chain** while executions happen **off-chain** for performance  
 
-> ⚡ Own it. Rent it. Use it — all on-chain.
+> ⚡ Own it. Rent it. Use it. Remint it — all on-chain.
 
 ---
 
@@ -33,20 +44,11 @@ SeiAgents - A decentralized platform where users can **rent or own AI agents** u
 
 ## 🚀 3. Features  
 
-- 🛍️ **AI Agent Marketplace** – Discover and rent AI agents for various tasks  
-- 🧠 **NFT Agent Ownership** – Buy and trade agents as NFTs with embedded access rights  
-- 💳 **Credit-Based Access** – Use credits (purchased via smart contracts) to access agents without full ownership  
-- 🔐 **Secure Access Control** – On-chain validation, off-chain speed  
-- ⚙️ **Off-Chain Execution** – Scalable agent performance via external APIs or services  
-
----
-
-<br>
-
-## 🔮 4. What’s Next  
-- 🌟 **Reputation & Review System**  
-- 🔁 **Subscription Models via Smart Contracts**  
-- 🧾 **Royalty Mechanisms for Developers**
+- 🛍️ **AI Agent Marketplace** – Discover and rent specialized AI agents for different tasks  
+- 🧠 **NFT Agent Ownership** – Buy and trade AI agents as NFTs with exclusive usage rights   
+- 💳 **Credit-Based Usage** – Use credits (via smart contracts) to access agents without full ownership  
+- 🔐 **On-Chain Access Control** – Secure validation, decentralized trust  
+- ⚙️ **Off-Chain Execution** – Efficient, scalable performance via external services
 
 ---
 
@@ -56,33 +58,46 @@ SeiAgents - A decentralized platform where users can **rent or own AI agents** u
 
 | Stakeholder       | Value Delivered                                                                 |
 |-------------------|----------------------------------------------------------------------------------|
-| 👨‍💻 Developers     | Monetize AI globally without middlemen                                           |
-| 🙋 Users           | Seamless access to powerful bots using $SEI                                      |
-| 🌐 Sei Blockchain  | Expands $SEI utility beyond DeFi into the AI economy layer                       |
+| 👨‍💻 Developers     | Monetize AI globally without intermediaries                                       |
+| 🙋 Users           | Seamless, secure access to powerful AI using $SEI                                |
+| 🌐 Sei Blockchain  | Extends $SEI’s utility beyond DeFi into the AI-driven economy                    |
+
+---
+
+<br>
+
+## ⚡ 6. Why Sei?  
+
+| Sei Feature           | What It Enables                                                              |
+|-----------------------|------------------------------------------------------------------------------|
+| 🚀 Parallel Execution | High-throughput NFT and agent transactions                                   |
+| ⚡ Fast Finality       | Instant credit top-ups and AI usage                                          |
+| 💸 Low Gas Fees        | Micro-payments and real-time interactions made viable                       |
 
 ---
 
 <br>
 
 
-## ⚡ 6. Why Sei?  
+## 🔮 4. What’s Next  
 
-| Sei Feature           | What It Enables                                                              |
-|-----------------------|------------------------------------------------------------------------------|
-| 🚀 Parallel Execution | Scalable bot and NFT transactions                                             |
-| ⚡ Fast Finality       | Instant credit purchases and agent access                                    |
-| 💸 Low Gas Fees        | Enables microtransactions and real-time interactions                         |
+- 🌟 **Reputation & Review System**  
+- 🔁 **Subscription Models via Smart Contracts**  
+- 🧾 **Royalty Mechanisms for Developers**  
+- 🔄 **Reminting System for NFT Transfers & Upgrades**
 
 ---
 
 <br>
 
 ## 🛠️ 7. Tech Stack  
-- **Frontend**: React with MetaMask integration
-- **Payments**: Smart contracts built with Solidity
-- **Bot Hosting**: Off-chain using cloud servers, APIs, and containers
-- **Blockchain**: SEI Blockchain
-- **Backend**: Node.js with Ethers.js for wallet instance management
+
+- **Frontend**: React + MetaMask integration  
+- **Smart Contracts**: Solidity using Hardhat development environment  
+- **Libraries**: OpenZeppelin Contracts & Upgradeable Contracts  
+- **Blockchain**: SEI  
+- **Backend**: Node.js with Ethers.js for wallet & contract management  
+
 
 ---
 
