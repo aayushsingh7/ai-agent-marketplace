@@ -46,7 +46,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       fetch("http://localhost:4000/api/v1/agents/use?agentID=${
         agentDetails?._id
       }", {
-        method: "POST",
+        method: "${agentDetails?.requestMethod}",
         headers: {
           "Content-Type": "application/json",
           "sei-agents-api-key": "${
@@ -80,10 +80,9 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         }"
       }
     
-      response = requests.post(
+      response = requests.${agentDetails?.requestMethod}(
         url,
         headers=headers,
-        cookies={"session": "your_session_id"},
         data=json.dumps(${requestBody})
       )
     
@@ -91,9 +90,14 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       `,
   };
 
+
   useEffect(() => {
     fetchAgentDetails(params.agentID || "");
   }, []);
+
+  useEffect(()=> {
+    setRequestBody(JSON.stringify(agentDetails?.requestBody))
+  },[agentDetails])
 
   useEffect(() => {
     fetchUserCredit();
@@ -169,7 +173,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             agentID: agentDetails._id,
-            tokenID: "7",
+            tokenID: agentDetails.tokenId,
             creditAmount: credits,
             walletAddress: address,
           }),
@@ -231,7 +235,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
           body: JSON.stringify({
             transactionHash: receipt.hash,
             agentID: agentDetails._id,
-            tokenID: "7",
+            tokenID: agentDetails.tokenId,
             creditAmount: credits,
             walletAddress: address,
             gasFee: gasFee.toString(),
@@ -282,7 +286,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         }
       );
       const data = await response.json();
-      setTryAgentResponse(data);
+      setTryAgentResponse(data.data);
     } catch (err: any) {
       Notification.error(err.message);
     }
@@ -297,7 +301,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
             setTab={setSelectedSection}
             selectedTab={selectedSection}
           />
-          <Page>
+          <Page width={"calc(100% - 250px)"}>
             <Input
               placeholder="Search Agents (eg: Booking agents, Trading agents, etc..)"
               onKeyDown={(e) =>
@@ -306,7 +310,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                 navigate(`/marketplace?search=${e.target.value}`)
               }
             />
-            <div className={styles.section_container}>
+            <div  className={styles.section_container}>
               {selectedSection == 1 ? (
                 <section className={styles.section_one}>
                   <AgentBox
@@ -315,7 +319,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                     allowBorder={false}
                   />
 
-                  <div className={styles.agent_option}>
+                 {agentDetails?.owner?.walletAddress != loggedInUser?.walletAddress &&  <div className={styles.agent_option}>
                     {agentDetails.status == 1 && (
                       <Button onClick={() => setSelectedSection(3)}>
                         Rent Agent
@@ -326,7 +330,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                         Buy NFT
                       </Button>
                     )}
-                  </div>
+                  </div>}
 
                   <div className={styles.more_details}>
                     <div className={styles.agent_info}>
@@ -339,6 +343,10 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                           </tr>
                         </thead>
                         <tbody>
+                        <tr>
+                            <td>Agent Token ID:</td>
+                            <td>{agentDetails?.tokenId || "N/A"}</td>
+                          </tr>
                           <tr>
                             <td>Agent Name:</td>
                             <td>{agentDetails.name}</td>
@@ -565,7 +573,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                             }
                             type="number"
                             max={10000}
-                            min={5}
+                            min={1}
                             defaultValue={10}
                             step={1}
                           />
@@ -586,7 +594,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                       defaultValue={selectedLanguage}
                       valuesList={["Javascript", "Python"]}
                     />
-                    <Button onClick={tryAgent}>Send Request</Button>
+                    <Button className={styles.tryAgent} onClick={tryAgent}>Send Request</Button>
                   </div>
 
                   <div className={styles.code_highlighter}>

@@ -54,7 +54,7 @@ class AgentController {
 
   async createAgent(req, res) {
     try {
-      let agent = await this.createAgent(req.body);
+      let agent = await this.agentService.createAgent(req.body);
       res.status(200).send({
         success: true,
         message: "New agent created successfully",
@@ -77,8 +77,9 @@ class AgentController {
         data: agent,
       });
     } catch (err) {
+      console.log(err)
       res
-        .status(err.statusCode)
+        .status(err.statusCode || 500)
         .send({ success: false, message: "Oops! something went wrong" });
     }
   }
@@ -104,7 +105,11 @@ class AgentController {
         req.requestType,
         req.userID
       );
-      return res.redirect(originalAPI);
+     
+      const agent = await this.agent.findOne({_id:agentID})
+      let agentResponse = await fetch(originalAPI,{method:agent.requestMethod,body:agent.requestBody,credentials:"include"})
+      let agentData = await agentResponse.json();
+      res.status(200).send({success:true,message:"Data fetched successfully", data:agentData})
     } catch (err) {
       res.status(err.statusCode || 500).send({
         success: false,

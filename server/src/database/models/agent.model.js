@@ -22,6 +22,8 @@ const agentSchema = new Schema(
     usageLicense: { type: String },
     isForSale: { type: Boolean, default: false },
     salePrice: { type: Number, default: 0 },
+    requestBody:{type:Schema.Types.Mixed},
+    requestMethod:{type:String,enum:["POST","PUT"]},
     blockchainDetails: {
       blockchain: { type: String, default: "Sei Network" },
     },

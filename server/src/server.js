@@ -16,12 +16,23 @@ app.use(cookieParser())
 app.use(cors({credentials:true,origin:true}))
 app.use(express.json())
 
-app.get("/api/v1/trading-agent", async(req,res)=> {
+
+// Just for Simulating Agents (not server code) -------------------------------------------
+app.post("/api/v1/trading-agent", async(req,res)=> {
     res.status(200).json({
        data:"This will be the response from AI Agents hosted on your's sever or cloud service",
        success:true,
     })
 })
+
+app.post("/api/v1/booking-agent", async(req,res)=> {
+    res.status(200).json({
+       data:"This will be the response from AI Agents hosted on your's sever or cloud service",
+       success:true,
+    })
+})
+// --------------------------------------------------------------------------
+
 
 app.use("/api/v1/agents", agentRoutes)
 app.use("/api/v1/auth", authRoutes)

@@ -11,7 +11,7 @@ import Notification from "../utils/notification";
 interface BuyAgentNFTProps {}
 
 const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
-  const { selectedAgent, setShowBuyAgent, setIsProcessing, setProcessingText } = useAppContext();
+  const { selectedAgent, setShowBuyAgent, setIsProcessing, setProcessingText, loggedInUser } = useAppContext();
   const [agree, setAgree] = useState<boolean>(false);
 
   // const [isProcessing, setIsProcessing] = useState(false);
@@ -37,6 +37,12 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
 
+      if(address.toLowerCase() !== loggedInUser?.walletAddress) {
+        // console.log("CURRENT USER ADDRESS",address, loggedInUser?.walletAddress)
+        Notification.error("Please select the wallet you are logged in with")
+        return;
+      } 
+
       // Step 1: Get transaction data from backend
       const prepareResponse = await fetch(
         `${import.meta.env.VITE_API_URL}/wallets/prepare-buy-nft`,
@@ -45,7 +51,7 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             agentID: selectedAgent._id,
-            tokenID: "7",
+            tokenID: selectedAgent.tokenId,
             walletAddress: address,
           }),
           credentials: "include",
@@ -68,6 +74,7 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
       );
 
       const tx2 = await contract["isAgentForSale"]("7")
+      console.log("tx2",tx2)
       setProcessingText("Executing The Transaction...")
       // Step 3: Execute the transaction
       const tx = await contract[txData.data.method](...txData.data.params, {
@@ -84,10 +91,8 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
       // Calculate the total gas fee
       const gasFee = gasUsed * gasPrice;
 
-      // Convert to a more readable format if needed
       const gasFeeInEth = ethers.formatEther(gasFee);
       setProcessingText("Confirming the Transaction...")
-      // Step 5: Inform backend of successful purchase
       const confirmResponse = await fetch(
         `${import.meta.env.VITE_API_URL}/wallets/confirm-nft-purchase`,
         {
@@ -97,7 +102,7 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
             transactionHash: receipt.hash,
             agentID: selectedAgent._id,
             walletAddress: address,
-            gasFee,
+            gasFee:gasFee.toString(),
             gasFeeInEth,
           }),
           credentials: "include",
@@ -110,8 +115,10 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
         throw new Error(data.error || "Failed to confirm purchase");
       }
       Notification.success("Transaction Completed Successfully")
+      Notification.info("Please refresh the page to see changes")
     } catch (err: any) {
       const revertMessage = err?.revert?.args?.[0];
+      console.log(err)
       console.error("Main revert message:", revertMessage);
       Notification.error(revertMessage)
       setError("Failed to buy NFT: " + (err.message || "Unknown error"));

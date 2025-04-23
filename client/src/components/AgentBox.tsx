@@ -32,13 +32,13 @@ const AgentBox: FC<AgentBoxProps> = ({
         </p>
       )}
 
-      {(type == "nft" || loggedInUser?._id == data.owner )&& (
+      {(loggedInUser?._id == data.owner || loggedInUser?.walletAddress == data?.owner?.walletAddress)&& (
         <p
           title="Agent Category"
           className={styles.agent_type_tag}
-          style={{ marginLeft: "8px" }}
+          style={{ marginLeft: location.pathname.startsWith("/marketplace/agents") ? "0px" : "8px" }}
         >
-          Owned
+          Owned by You
         </p>
       )}
       <div className={styles.agent_box}>

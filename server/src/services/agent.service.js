@@ -48,7 +48,6 @@ class AgentService {
   }
 
   async getAgent(agentID) {
-s
     try {
       if (!mongoose.Types.ObjectId.isValid(agentID)) {
         throw new CustomError("Invalid Agent ID format", 400);
@@ -72,7 +71,7 @@ s
       return agent;
     } catch (err) {
       console.log(err);
-      throw new CustomError("Failed to retrieve agent: " + err.message);
+      throw new CustomError("Failed to retrieve agent: " + err.message, 500);
     }
   }
 
@@ -99,7 +98,6 @@ s
               "Free usage limit exceeded, please buy credits"
             );
 
-          // Increment the existing entry
           user.freeRequestsPerAgent[freeTrailIndex].request += 1;
         }
 

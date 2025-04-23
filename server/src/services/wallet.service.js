@@ -36,7 +36,6 @@ class WalletService {
     });
   }
 
-  // Helper method to get contract instance with signer
   async getContract(wallet) {
     if (!wallet) {
       throw new CustomError("Wallet connection required", 400);
@@ -51,14 +50,12 @@ class WalletService {
     }
   }
 
-  
   async createAgent(wallet, recipient, agentData, gasLimit) {
     try {
       if (!recipient) {
         throw new CustomError("Recipient address is required", 400);
       }
 
-      // Extract required parameters from agentData
       const costPerCredit = ethers.parseEther(
         `${agentData.rentingDetails?.costPerCredit}`
       );
@@ -76,22 +73,19 @@ class WalletService {
         ],
       };
 
-      // Convert the metadata to a data URI (base64 encoded)
       const metadataString = JSON.stringify(metadataJSON);
       const tokenURI = `data:application/json;base64,${Buffer.from(
         metadataString
       ).toString("base64")}`;
 
-      // Get contract instance
       const contract = await this.getContract(wallet);
 
-      // Create transaction options
       const txOptions = {};
       if (gasLimit) {
         txOptions.gasLimit = gasLimit;
       }
+      let tokenId;
 
-      // Send transaction to create agent
       const tx = await contract.createAgent(
         recipient,
         tokenURI,
@@ -101,45 +95,66 @@ class WalletService {
         txOptions
       );
 
-
-      // Wait for transaction to be mined
       const receipt = await tx.wait();
-      let tokenId;
+      const logs = receipt.logs;
 
-      // Try to find the AgentCreated event directly
-      const agentCreatedEvent = receipt.events?.find(
-        (event) => event.event === "AgentCreated"
-      );
+      if (logs && logs.length > 0) {
+        const agentCreatedSignature =
+          "0x8558fde4efaf898722d0cb1dc7000e4dfbe6660d28a5173ba22ee2c618214995";
 
-      if (agentCreatedEvent && agentCreatedEvent.args) {
-        // Extract the token ID from the event arguments
-        tokenId = agentCreatedEvent.args[0].toString();
-      } else {
+        for (const log of logs) {
+          if (
+            log.topics &&
+            log.topics.length > 0 &&
+            log.topics[0] === agentCreatedSignature
+          ) {
+            // The tokenId is in the second position (index 1)
+            const hexTokenId = log.topics[1];
+            // Convert hex to decimal string
+            tokenId = parseInt(hexTokenId, 16).toString();
+            console.log("Found tokenId:", tokenId);
+            break;
+          }
+        }
 
-        // Fall back to manual log parsing
-        for (const log of receipt.logs) {
-          try {
-            const parsedLog = contract.interface.parseLog(log);
-            if (parsedLog && parsedLog.name === "AgentCreated") {
-              tokenId = parsedLog.args[0].toString();
-              break;
+        if (!tokenId) {
+          for (const log of logs) {
+            if (log.topics && log.topics.length > 2) {
+              const hexTokenId = log.topics[2];
+
+              if (hexTokenId.startsWith("0x")) {
+                try {
+                  tokenId = parseInt(hexTokenId, 16).toString();
+                  console.log("Found potential tokenId:", tokenId);
+                  break;
+                } catch (e) {}
+              }
             }
-          } catch (e) {
-            // Skip logs that can't be parsed with this interface
-            continue;
           }
         }
       }
 
+      if (
+        !tokenId &&
+        logs &&
+        logs.length > 0 &&
+        logs[2] &&
+        logs[2].topics &&
+        logs[2].topics.length > 1
+      ) {
+        const hexTokenId = logs[2].topics[1];
+        tokenId = parseInt(hexTokenId, 16).toString();
+        console.log("Extracted tokenId from specific position:", tokenId);
+      }
+
+      console.log("Created agent with token ID:", tokenId);
       if (!tokenId) {
         console.warn("Could not find tokenId in transaction logs");
       }
 
-      // Save agent data to MongoDB
       try {
         const creatorAddress = await wallet.getAddress();
 
-        // Create ownership history record
         const ownershipRecord = {
           owner: recipient.toLowerCase(),
           type: "Minted",
@@ -155,7 +170,7 @@ class WalletService {
         ];
 
         // Format rentingDetails according to schema
-        
+
         const rentingDetails = {
           costPerCredit: agentData.rentingDetails?.costPerCredit,
           creditCostPerReq: agentData.rentingDetails?.creditCostPerReq || 1,
@@ -175,6 +190,11 @@ class WalletService {
           blockchainDetails: blockchainDetails,
           salePrice,
           isForSale,
+          category:
+            agentData?.category?.charAt(0)?.toUpperCase() +
+            agentData?.category?.slice(1).toLowerCase(),
+          requestBody: agentData.requestBody,
+          requestMethod: agentData.requestMethod,
           isNFT: true,
           mintOnBlockchain: true,
           rentingDetails,
@@ -183,7 +203,6 @@ class WalletService {
         await newAgent.save();
       } catch (dbErr) {
         console.error("Failed to save agent to database:", dbErr);
-        // We don't throw here as the blockchain transaction was successful
       }
 
       return {
@@ -199,7 +218,6 @@ class WalletService {
     }
   }
 
-  
   async prepareBuyCredits(agentID, tokenId, creditAmount, userAddress) {
     try {
       if (
@@ -215,13 +233,11 @@ class WalletService {
         );
       }
 
-      // Get agent from MongoDB
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
 
-      // Verify user exists
       let user = await this.user.findOne({
         walletAddress: userAddress.toLowerCase(),
       });
@@ -232,20 +248,12 @@ class WalletService {
           404
         );
 
-      // IMPORTANT: Instead of using the database value, query the actual cost from the contract
-      // Create a provider to connect to the blockchain
       const provider = new ethers.JsonRpcProvider(this.rpcUrl);
-
-      // Create contract instance
       const contract = new ethers.Contract(this.contractAddress, ABI, provider);
-
-      // Get the actual credit cost from the contract
       const creditCost = await contract.getAgentCreditCost(tokenId);
 
-      // Calculate total cost using BigInt to handle large numbers precisely
       const totalCostInWei = creditCost * BigInt(creditAmount);
 
-      // Return transaction data for frontend
       return {
         contractAddress: this.contractAddress,
         contractABI: ABI,
@@ -265,9 +273,6 @@ class WalletService {
     }
   }
 
-  /**
-   * Records a successful credit purchase in the database
-   */
   async recordCreditPurchase(
     txHash,
     agentID,
@@ -278,22 +283,21 @@ class WalletService {
     gasFeeInEth
   ) {
     try {
-      // Get agent details
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
 
-      // Get user details
       let user = await this.user.findOne({
         walletAddress: userAddress.toLowerCase(),
       });
+
+      console.log(userAddress.toLowerCase())
 
       if (!user) {
         throw new CustomError("User not found", 404);
       }
 
-      // Find existing credit record or create new one
       let userCredit = await this.credit.findOne({
         walletAddress: userAddress.toLowerCase(),
         agent: agentID,
@@ -347,10 +351,8 @@ class WalletService {
     }
   }
 
-  /**
-   * Prepares transaction data for buying an NFT
-   */
   async prepareBuyAgentNFT(agentID, tokenId, userAddress) {
+    console.log("Entered prepareBuyAgentNFT")
     try {
       if (!tokenId || !agentID || !userAddress) {
         throw new CustomError(
@@ -359,27 +361,22 @@ class WalletService {
         );
       }
 
-      // Get agent from MongoDB
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
 
-      // Check if agent is for sale
       if (!agent.isForSale) {
         throw new CustomError("Agent is not for sale", 400);
       }
 
       const salePriceInSei = agent.salePrice;
-
-      // Convert SEI to wei for the transaction
       const salePriceInWei = ethers.parseEther(salePriceInSei.toString());
 
       if (!salePriceInSei) {
         throw new CustomError("Agent sale price not defined", 400);
       }
 
-      // Return transaction data for frontend
       return {
         contractAddress: this.contractAddress,
         contractABI: ABI,
@@ -397,12 +394,9 @@ class WalletService {
     }
   }
 
-  /**
-   * Records a successful NFT purchase in the database
-   */
   async recordNFTPurchase(txHash, agentID, userAddress, gasFee, gasFeeInEth) {
+    console.log("entered recordNFTPurchase")
     try {
-      // Get agent from MongoDB
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
         throw new CustomError("Agent not found", 404);
@@ -411,26 +405,25 @@ class WalletService {
       let user = await this.user.findOne({
         walletAddress: userAddress.toLowerCase(),
       });
-
-      // Update agent ownership
+     
       agent.owner = user._id;
-      agent.isForSale = false; // Optional: Mark as no longer for sale
+      agent.isForSale = false; 
       agent.ownershipHistory = [
         ...agent.ownershipHistory,
         {
           owner: userAddress,
           type: "Purchased",
           timestamp: new Date().toISOString(),
-          gasFree: gasFee,
+          gasFee: gasFee,
           transactionHash: txHash,
         },
       ];
 
       await agent.save();
 
-      return {
-        success: true,
-      };
+      console.log("updated AI AGENT",agent)
+
+      return agent
     } catch (err) {
       console.error("Record NFT purchase error:", err);
       throw new CustomError(
@@ -459,10 +452,6 @@ class WalletService {
         throw new CustomError("Agent not found", 404);
       }
 
-      // const costPerCredit = ethers.parseEther(
-      //   `${newCreditCost}`
-      // );
-      // Verify user exists
       const user = await this.user.findOne({
         walletAddress: walletAddress.toLowerCase(),
       });
@@ -492,12 +481,6 @@ class WalletService {
     }
   }
 
-  /**
-   * Confirm agent update after successful blockchain transaction
-   */
-  /**
-   * Confirm agent update after successful blockchain transaction
-   */
   async confirmAgentUpdate(
     transactionHash,
     agentID,

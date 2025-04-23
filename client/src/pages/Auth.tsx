@@ -96,7 +96,7 @@ const Auth = () => {
       });
       
       console.log("Connected accounts:", accounts);
-      const address = accounts[1];
+      const address = accounts[0];
       setWalletAddress(address);
       
       // Once we have the address, we can try to switch networks

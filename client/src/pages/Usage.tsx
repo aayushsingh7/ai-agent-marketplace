@@ -40,7 +40,7 @@ const Usage: FC<UsageProps> = ({}) => {
   }, [agentID]);
 
   return (
-    <Page>
+    <Page width="100%">
       <div className={styles.usage_page}>
         <h3>Agent Usage</h3>
 

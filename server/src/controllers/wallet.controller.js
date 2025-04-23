@@ -33,12 +33,6 @@ class WalletController {
     }
   }
 
-  // async updateAgentInfo(req, res) {
-  //   try {
-  //   } catch (err) {
-  //     res.status(err.statusCode).send({ success: false, message: err.message });
-  //   }
-  // }
 
   async prepareBuyCredits(req, res) {
     try {

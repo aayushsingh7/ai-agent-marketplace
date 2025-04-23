@@ -26,12 +26,20 @@
     display: inline-block;
 }
 
-.input_field input{
+
+.input_field input,
+.input_field textarea{
     font-size: 0.56rem;
     padding: 10px ;
     border: none;
     background: #efefef;
     border-radius: 4px;
+}
+
+.input_field textarea{
+    resize: none;
+    height: 100px;
+    width: 100%;
 }
 
 
@@ -87,4 +95,25 @@
 
 .upload_page .nor_button{
   background: #dfdfdf;
+}
+
+.tags_tags_tags{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.tags_tags_tags span{
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    background: #efefef;
+    border-radius: 5px;
+    margin-right:5px;
+}
+
+.tags_tags_tags span svg{
+    margin-right: 5px;
+    color: red;
+    cursor: pointer;
 }

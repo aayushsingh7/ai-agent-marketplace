@@ -6,10 +6,7 @@ import { ethers } from "ethers";
 
 async function verifyEthereumSignature(address, message, signature) {
   try {
-    // Ethereum signed messages are prefixed with this standard string
-    // and hashed before signing
     const signerAddress = ethers.verifyMessage(message, signature);
-    // Convert addresses to checksummed format for case-insensitive comparison
     const normalizedInputAddress = ethers.getAddress(address);
     const normalizedRecoveredAddress = ethers.getAddress(signerAddress);
 
@@ -21,8 +18,8 @@ async function verifyEthereumSignature(address, message, signature) {
 }
 
 function generateUsername() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz123456789';
-  let username = '';
+  const chars = "abcdefghijklmnopqrstuvwxyz123456789";
+  let username = "";
 
   for (let i = 0; i < 10; i++) {
     const randomIndex = Math.floor(Math.random() * chars.length);
@@ -32,11 +29,12 @@ function generateUsername() {
   return username;
 }
 
-
 class AuthService {
   constructor() {
     this.user = User;
-    this.jwtSecret = process.env.JWT_SECRET || "45409feeefqw.OPIPOI909343Mafdaerdf.eri393529fiadfasdf5pdfakdfeopk";
+    this.jwtSecret =
+      process.env.JWT_SECRET ||
+      "45409feeefqw.OPIPOI909343Mafdaerdf.eri393529fiadfasdf5pdfakdfeopk";
     this.jwtExpires = process.env.JWT_EXPIRES || "24h";
   }
 
@@ -49,13 +47,16 @@ class AuthService {
       }
 
       const nonce = crypto.randomBytes(16).toString("hex");
-
-      // Standard message format for Ethereum wallets
       const message = `Sign this message to verify your identity. Nonce: ${nonce}`;
 
       let user = await User.findOne({ walletAddress });
       if (!user) {
-        user = new User({ walletAddress, nonce, freeRequestsPerAgent:[], username:generateUsername()});
+        user = new User({
+          walletAddress,
+          nonce,
+          freeRequestsPerAgent: [],
+          username: generateUsername(),
+        });
       } else {
         user.nonce = nonce;
       }
@@ -66,7 +67,6 @@ class AuthService {
       if (error instanceof CustomError) {
         throw error;
       }
-      console.error("Error generating nonce:", error);
       throw new CustomError("Failed to generate nonce", 500);
     }
   }
@@ -74,9 +74,6 @@ class AuthService {
   async verifySignature(data) {
     try {
       const { walletAddress, signature } = data;
-
-      console.log({walletAddress,signature})
-
       if (!walletAddress || !signature) {
         throw new CustomError("Missing required parameters", 400);
       }
@@ -87,7 +84,7 @@ class AuthService {
       }
 
       const nonce = user.nonce;
-      
+
       if (!nonce) {
         throw new CustomError(
           "No nonce found for this wallet. Please request a new one.",
@@ -108,7 +105,6 @@ class AuthService {
         throw new CustomError("Invalid signature", 401);
       }
 
-      // Clear the nonce after successful verification to prevent replay attacks
       user.nonce = null;
       await user.save();
 
@@ -125,10 +121,10 @@ class AuthService {
         success: true,
         message: "Authentication successful",
         token,
-        data:user
+        data: user,
       };
     } catch (error) {
-      console.log(error)
+      console.log(error);
       throw new CustomError("Failed to verify signature", 500);
     }
   }

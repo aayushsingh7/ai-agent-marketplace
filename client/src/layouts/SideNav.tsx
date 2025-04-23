@@ -10,7 +10,7 @@ interface SideNavProps {
 }
 
 const SideNav: FC<SideNavProps> = ({ type, setTab, selectedTab }) => {
-  const { loggedInUser } = useAppContext();
+  const { loggedInUser , selectedAgent} = useAppContext();
   const [selectedRoute, setSelectedRoute] = useState("/");
   const navigate = useNavigate();
 
@@ -42,14 +42,14 @@ const SideNav: FC<SideNavProps> = ({ type, setTab, selectedTab }) => {
             >
               1.2 Documentation
             </li>
-            <li
+            {(selectedAgent && loggedInUser?.walletAddress != selectedAgent?.owner.walletAddress) && <li
               style={{ fontWeight: selectedTab == 3 ? 600 : 500 }}
               onClick={() =>
                 loggedInUser?._id ? setTab(3) : navigate("/auth")
               }
             >
               1.3 Buy Credits
-            </li>
+            </li>}
           </ul>
         ) : (
           <ul>
@@ -93,7 +93,7 @@ const SideNav: FC<SideNavProps> = ({ type, setTab, selectedTab }) => {
           </ul>
         )}
 
-        <ul>
+       {!location.pathname.startsWith("/marketplace/agents") &&  <ul>
           <li
             style={{
               background: selectedRoute == "/settings" ? "#efefef" : "#ffffff",
@@ -109,7 +109,7 @@ const SideNav: FC<SideNavProps> = ({ type, setTab, selectedTab }) => {
           >
             <Link to="/logout">Logout</Link>
           </li>
-        </ul>
+        </ul>}
         </div>
       </div>
     </nav>

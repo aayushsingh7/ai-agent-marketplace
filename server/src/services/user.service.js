@@ -44,7 +44,7 @@ class UserService {
   async fetchSubscriptions(userID) {
     try {
       const results = await this.credits
-        .find({ user: userID , owner:userID})
+        .find({ user: userID})
         .populate({
           path: "agent",
           select: "name description category verified walletAddress",

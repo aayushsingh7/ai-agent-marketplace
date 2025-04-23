@@ -10,6 +10,7 @@ import { useAppContext } from "../context/contextAPI";
 import { useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
 import Notification from "../utils/notification";
+import { AiOutlineClose } from "react-icons/ai";
 
 interface UploadProps {}
 
@@ -31,13 +32,22 @@ const Upload: FC<UploadProps> = ({}) => {
   const [agentStatus, setAgentStatus] = useState<string>("Available");
 
   const [tags, setTags] = useState<any[]>([]);
-  const [trainedOn, setTrainedOne] = useState<any[]>([]);
+  const [trainedOn, setTrainedOn] = useState<any[]>([]);
   const [confirmSubmission, setConfirmSubmission] = useState<boolean>(false);
 
   const [isForSale, setIsForSale] = useState<boolean>(false);
+  const [requestBody,setRequestBody] = useState<any>({
+    prompt:"Hello world",
+    maxOutputLength:1000,
+  })
+  const [requestMethod,setRequestMethod]  = useState<string>("POST")
+
   const [agentSalePrice, setAgentSalePrice] = useState<number>(0);
   const [creditCostPerReq, setCreditCostPerReq] = useState<number>(1);
   const [costPerCredit, setCostPerCredit] = useState<number>(0.001);
+
+  const [tagTxt,setTagTxt] = useState<string>("")
+  const [trainedOnTxt,setTrainedOnTxt] = useState<string>("")
 
   const createAgent = async () => {
     setIsProcessing(true)
@@ -60,6 +70,8 @@ const Upload: FC<UploadProps> = ({}) => {
         salePrice: agentSalePrice,
         documentation: markdownText,
         deployedAPI: deployedURL,
+        requestMethod,
+        requestBody:JSON.stringify(requestBody),
         rentingDetails: {
           costPerCredit: costPerCredit,
           creditCostPerReq: creditCostPerReq,
@@ -92,7 +104,7 @@ const Upload: FC<UploadProps> = ({}) => {
 
 
   return (
-    <Page>
+    <Page width="100%">
       <div className={styles.upload_page}>
         <h3>Upload Agent</h3>
         <form
@@ -125,12 +137,6 @@ const Upload: FC<UploadProps> = ({}) => {
                 <div className={styles.input_field}>
                   <span>
                     Enter Agent Description
-                    <span
-                      title="Required"
-                      style={{ marginLeft: "2px", color: "#b30000" }}
-                    >
-                      *
-                    </span>
                   </span>
                   <Input
                     placeholder=""
@@ -170,24 +176,49 @@ const Upload: FC<UploadProps> = ({}) => {
                   />
                 </div>
 
+                <div
+                  className={styles.input_field}
+                  style={{ marginTop: "10px" }}
+                >
+                  <span style={{ marginBottom: "7px" }}>
+                    Select Agent Request Method
+                  </span>
+                  <DropDown
+                    changeDefaultValue={setRequestMethod}
+                    valuesList={["POST","PUT"]}
+                    defaultValue={requestMethod}
+                  />
+                </div>
+
+                <div className={styles.input_field} style={{marginTop:"20px"}}>
+                  <span>Specify the Request Body Format (example structure expected when calling your API</span>
+                  <textarea onChange={(e)=> {setRequestBody(e.target.value);console.log(requestBody)}}>
+                    {JSON.stringify(requestBody)}
+                  </textarea>
+                </div>
+
+
                 <div className={styles.input_field}>
                   <span>Agent Trained On (include links, topics, etc)</span>
                   <Input
+                  value={trainedOnTxt}
+                  onChange={(e)=> setTrainedOnTxt(e.target.value)}
                     placeholder=""
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        setTrainedOne((oldData) => [
+                        setTrainedOn((oldData) => [
                           ...oldData,
                           //@ts-ignore
                           e.target?.value,
                         ]);
+                        setTrainedOnTxt("")
                       }
                     }}
                   />
-                  <div>
+                  <div className={styles.tags_tags_tags}>
                     {trainedOn.map((data) => {
-                      return <span>{data}</span>;
+                      return <span><AiOutlineClose onClick={()=> setTrainedOn((oldData)=> oldData.filter((tag)=> tag !== data))}/> {data}</span>;
                     })}
                   </div>
                 </div>
@@ -195,18 +226,22 @@ const Upload: FC<UploadProps> = ({}) => {
                 <div className={styles.input_field}>
                   <span>Add Agent Tags</span>
                   <Input
+                  value={tagTxt}
+                  onChange={(e)=> setTagTxt(e.target.value)}
                     placeholder=""
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
                         //@ts-ignore
                         setTags((oldData) => [...oldData, e.target?.value]);
+                        setTagTxt("")
                       }
                     }}
+
                   />
-                  <div>
+                  <div className={styles.tags_tags_tags}>
                     {tags.map((data) => {
-                      return <span>{data}</span>;
+                      return <span><AiOutlineClose onClick={()=> setTags((oldData)=> oldData.filter((tag)=> tag !== data))}/> {data}</span>;
                     })}
                   </div>
                 </div>

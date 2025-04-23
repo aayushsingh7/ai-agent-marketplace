@@ -4,10 +4,7 @@ import authenticateUser from "../milddleware/authenticateUser.js";
 const walletRoutes = Router();
 const walletController = new WalletController();
 
-// walletRoutes.put("/buy-credits", authenticateUser, walletController.buyCredits);
 walletRoutes.put("/mint", authenticateUser, walletController.createAgent);
-// walletRoutes.put("/buy-nft", authenticateUser, walletController.buyAgentNFT);
-
 walletRoutes.post("/prepare-buy-credits",authenticateUser, walletController.prepareBuyCredits)
 walletRoutes.post("/confirm-credit-purchase",authenticateUser,walletController.confirmCreditPurchase)
 walletRoutes.post("/prepare-buy-nft",authenticateUser,walletController.prepareBuyNFT)
