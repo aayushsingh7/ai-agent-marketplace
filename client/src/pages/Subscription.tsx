@@ -43,7 +43,12 @@ const Subscription: FC<SubscriptionProps> = ({}) => {
     <Page>
       <div className={styles.subs_page}>
         <h3 style={{ marginBottom: "30px" }}>Your Subscriptions</h3>
-        <Input placeholder="Search Agent" />
+        <Input placeholder="Search Agent"
+        onKeyDown={(e) =>
+          e.key == "Enter" &&
+          //@ts-ignore
+          navigate(`/marketplace?search=${e.target.value}`)
+        } />
         {loading ? (
           <Loading />
         ) : subscriptions.length === 0 ? (
