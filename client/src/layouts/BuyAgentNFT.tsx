@@ -38,7 +38,6 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
       const address = await signer.getAddress();
 
       if(address.toLowerCase() !== loggedInUser?.walletAddress) {
-        // console.log("CURRENT USER ADDRESS",address, loggedInUser?.walletAddress)
         Notification.error("Please select the wallet you are logged in with")
         return;
       } 
@@ -74,7 +73,6 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
       );
 
       const tx2 = await contract["isAgentForSale"]("7")
-      console.log("tx2",tx2)
       setProcessingText("Executing The Transaction...")
       // Step 3: Execute the transaction
       const tx = await contract[txData.data.method](...txData.data.params, {
@@ -118,7 +116,6 @@ const BuyAgentNFT: FC<BuyAgentNFTProps> = ({}) => {
       Notification.info("Please refresh the page to see changes")
     } catch (err: any) {
       const revertMessage = err?.revert?.args?.[0];
-      console.log(err)
       console.error("Main revert message:", revertMessage);
       Notification.error(revertMessage)
       setError("Failed to buy NFT: " + (err.message || "Unknown error"));

@@ -124,7 +124,6 @@ class AuthService {
         data: user,
       };
     } catch (error) {
-      console.log(error);
       throw new CustomError("Failed to verify signature", 500);
     }
   }

@@ -26,7 +26,6 @@ const validateAgentAccessToken = (req, res, next) => {
     req.userID = decoded.userID;
     next();
   } catch (error) {
-    console.log(error)
     return res.status(500).send({
       success: false,
       message: "Oops! something went wrong while validating the token",

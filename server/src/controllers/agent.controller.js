@@ -77,7 +77,6 @@ class AgentController {
         data: agent,
       });
     } catch (err) {
-      console.log(err)
       res
         .status(err.statusCode || 500)
         .send({ success: false, message: "Oops! something went wrong" });
@@ -105,11 +104,21 @@ class AgentController {
         req.requestType,
         req.userID
       );
-     
-      const agent = await this.agent.findOne({_id:agentID})
-      let agentResponse = await fetch(originalAPI,{method:agent.requestMethod,body:agent.requestBody,credentials:"include"})
+
+      const agent = await this.agent.findOne({ _id: agentID });
+      let agentResponse = await fetch(originalAPI, {
+        method: agent.requestMethod,
+        body: agent.requestBody,
+        credentials: "include",
+      });
       let agentData = await agentResponse.json();
-      res.status(200).send({success:true,message:"Data fetched successfully", data:agentData})
+      res
+        .status(200)
+        .send({
+          success: true,
+          message: "Data fetched successfully",
+          data: agentData,
+        });
     } catch (err) {
       res.status(err.statusCode || 500).send({
         success: false,
@@ -121,13 +130,11 @@ class AgentController {
   async fetchOwnedNFTs(req, res) {
     try {
       const nfts = await this.agentService.fetchOwnedNFTs(req.userID);
-      res
-        .status(200)
-        .send({
-          success: true,
-          message: "NFTs fetched successfully",
-          data: nfts,
-        });
+      res.status(200).send({
+        success: true,
+        message: "NFTs fetched successfully",
+        data: nfts,
+      });
     } catch (err) {
       res
         .status(err.statusCode || 500)

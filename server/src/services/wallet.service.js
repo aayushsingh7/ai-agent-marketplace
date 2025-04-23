@@ -112,7 +112,6 @@ class WalletService {
             const hexTokenId = log.topics[1];
             // Convert hex to decimal string
             tokenId = parseInt(hexTokenId, 16).toString();
-            console.log("Found tokenId:", tokenId);
             break;
           }
         }
@@ -125,7 +124,6 @@ class WalletService {
               if (hexTokenId.startsWith("0x")) {
                 try {
                   tokenId = parseInt(hexTokenId, 16).toString();
-                  console.log("Found potential tokenId:", tokenId);
                   break;
                 } catch (e) {}
               }
@@ -144,10 +142,8 @@ class WalletService {
       ) {
         const hexTokenId = logs[2].topics[1];
         tokenId = parseInt(hexTokenId, 16).toString();
-        console.log("Extracted tokenId from specific position:", tokenId);
       }
 
-      console.log("Created agent with token ID:", tokenId);
       if (!tokenId) {
         console.warn("Could not find tokenId in transaction logs");
       }
@@ -292,8 +288,6 @@ class WalletService {
         walletAddress: userAddress.toLowerCase(),
       });
 
-      console.log(userAddress.toLowerCase())
-
       if (!user) {
         throw new CustomError("User not found", 404);
       }
@@ -352,7 +346,6 @@ class WalletService {
   }
 
   async prepareBuyAgentNFT(agentID, tokenId, userAddress) {
-    console.log("Entered prepareBuyAgentNFT")
     try {
       if (!tokenId || !agentID || !userAddress) {
         throw new CustomError(
@@ -395,7 +388,6 @@ class WalletService {
   }
 
   async recordNFTPurchase(txHash, agentID, userAddress, gasFee, gasFeeInEth) {
-    console.log("entered recordNFTPurchase")
     try {
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
@@ -405,9 +397,9 @@ class WalletService {
       let user = await this.user.findOne({
         walletAddress: userAddress.toLowerCase(),
       });
-     
+
       agent.owner = user._id;
-      agent.isForSale = false; 
+      agent.isForSale = false;
       agent.ownershipHistory = [
         ...agent.ownershipHistory,
         {
@@ -420,10 +412,7 @@ class WalletService {
       ];
 
       await agent.save();
-
-      console.log("updated AI AGENT",agent)
-
-      return agent
+      return agent;
     } catch (err) {
       console.error("Record NFT purchase error:", err);
       throw new CustomError(

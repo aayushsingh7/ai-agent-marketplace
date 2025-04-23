@@ -65,15 +65,12 @@ class UserController {
         return res
           .status(404)
           .send({ success: false, message: "No user credit found" });
-      res
-        .status(200)
-        .send({
-          success: true,
-          message: "User credits fetched successfully",
-          data: credit,
-        });
+      res.status(200).send({
+        success: true,
+        message: "User credits fetched successfully",
+        data: credit,
+      });
     } catch (err) {
-      console.log(err);
       res
         .status(500)
         .send({ success: false, message: "Oops! something went wrong" });

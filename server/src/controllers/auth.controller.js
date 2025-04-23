@@ -31,7 +31,7 @@ class AuthController {
       res
         .cookie("seiagents", result.token, {
           httpOnly: true,
-          secure:process.env.NODE_ENV === 'production',
+          secure: process.env.NODE_ENV === "production",
           path: "/",
         })
         .status(200)
@@ -48,18 +48,14 @@ class AuthController {
   }
 
   async getLoggedInUser(req, res) {
-
     try {
       const userData = await this.user.findOne({ _id: req.userID });
-      res
-        .status(200)
-        .send({
-          success: true,
-          message: "User data fetched successfully",
-          data: userData,
-        });
+      res.status(200).send({
+        success: true,
+        message: "User data fetched successfully",
+        data: userData,
+      });
     } catch (err) {
-      console.log(err)
       res
         .status(500)
         .send({ success: false, message: "Oops! something went wrong" });

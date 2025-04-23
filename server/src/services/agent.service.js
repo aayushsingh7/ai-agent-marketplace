@@ -42,7 +42,6 @@ class AgentService {
         });
       return agents;
     } catch (err) {
-      console.log(err);
       throw new CustomError("Fsailed to search agents: " + err.message);
     }
   }
@@ -70,7 +69,6 @@ class AgentService {
 
       return agent;
     } catch (err) {
-      console.log(err);
       throw new CustomError("Failed to retrieve agent: " + err.message, 500);
     }
   }

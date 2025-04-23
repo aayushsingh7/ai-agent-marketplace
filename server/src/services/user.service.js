@@ -18,7 +18,6 @@ class UserService {
         throw new CustomError("No User Found, please verfiy the userID", 404);
       return user;
     } catch (err) {
-      console.log(err);
       throw new CustomError("Oops Something went wrong!", 500);
     }
   }
@@ -36,7 +35,6 @@ class UserService {
         throw new CustomError("Cannot Update User Info, Try Again Later", 400);
       return updateStatus;
     } catch (err) {
-      console.log(err);
       throw new CustomError("Oops Something went wrong!", 500);
     }
   }
@@ -44,7 +42,7 @@ class UserService {
   async fetchSubscriptions(userID) {
     try {
       const results = await this.credits
-        .find({ user: userID})
+        .find({ user: userID })
         .populate({
           path: "agent",
           select: "name description category verified walletAddress",
@@ -53,13 +51,9 @@ class UserService {
 
       return results;
     } catch (err) {
-      console.log(err)
       throw new CustomError("Oops something went wrong", 500);
     }
   }
-  
-
-  
 }
 
 export default UserService;

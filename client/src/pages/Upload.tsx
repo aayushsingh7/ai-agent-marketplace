@@ -15,8 +15,8 @@ import { AiOutlineClose } from "react-icons/ai";
 interface UploadProps {}
 
 const Upload: FC<UploadProps> = ({}) => {
-  const { loggedInUser,setIsProcessing,setProcessingText } = useAppContext();
-  const navigate = useNavigate()
+  const { loggedInUser, setIsProcessing, setProcessingText } = useAppContext();
+  const navigate = useNavigate();
 
   const [markdownText, setMarkdownText] = useState<string>(``);
   const [formSection, setFormSection] = useState<number>(0);
@@ -36,22 +36,22 @@ const Upload: FC<UploadProps> = ({}) => {
   const [confirmSubmission, setConfirmSubmission] = useState<boolean>(false);
 
   const [isForSale, setIsForSale] = useState<boolean>(false);
-  const [requestBody,setRequestBody] = useState<any>({
-    prompt:"Hello world",
-    maxOutputLength:1000,
-  })
-  const [requestMethod,setRequestMethod]  = useState<string>("POST")
+  const [requestBody, setRequestBody] = useState<any>({
+    prompt: "Hello world",
+    maxOutputLength: 1000,
+  });
+  const [requestMethod, setRequestMethod] = useState<string>("POST");
 
   const [agentSalePrice, setAgentSalePrice] = useState<number>(0);
   const [creditCostPerReq, setCreditCostPerReq] = useState<number>(1);
   const [costPerCredit, setCostPerCredit] = useState<number>(0.001);
 
-  const [tagTxt,setTagTxt] = useState<string>("")
-  const [trainedOnTxt,setTrainedOnTxt] = useState<string>("")
+  const [tagTxt, setTagTxt] = useState<string>("");
+  const [trainedOnTxt, setTrainedOnTxt] = useState<string>("");
 
   const createAgent = async () => {
-    setIsProcessing(true)
-    setProcessingText("Uploading the Agent...")
+    setIsProcessing(true);
+    setProcessingText("Uploading the Agent...");
     try {
       const data = {
         name: agentName,
@@ -60,7 +60,7 @@ const Upload: FC<UploadProps> = ({}) => {
         mintOnBlockchain: true,
         planType: agentPlanType,
         owner: loggedInUser?.walletAddress,
-        creator:loggedInUser?.walletAddress,
+        creator: loggedInUser?.walletAddress,
         purpose: agentPurpose,
         trainedOn: trainedOn,
         tags: tags,
@@ -71,14 +71,13 @@ const Upload: FC<UploadProps> = ({}) => {
         documentation: markdownText,
         deployedAPI: deployedURL,
         requestMethod,
-        requestBody:JSON.stringify(requestBody),
+        requestBody: JSON.stringify(requestBody),
         rentingDetails: {
           costPerCredit: costPerCredit,
           creditCostPerReq: creditCostPerReq,
         },
       };
 
-      
       const upload = await fetch(
         `${import.meta.env.VITE_API_URL}/wallets/mint`,
         {
@@ -88,20 +87,19 @@ const Upload: FC<UploadProps> = ({}) => {
             agentData: data,
             recipient: loggedInUser?.walletAddress,
           }),
-          credentials:"include"
+          credentials: "include",
         }
       );
       const response = await upload.json();
-      if(upload.ok) {
-      Notification.success("New agent created successfully")
+      if (upload.ok) {
+        Notification.success("New agent created successfully");
       }
-    } catch (err:any) {
-      Notification.error(err.message)
-    }finally{
-      setIsProcessing(false)
+    } catch (err: any) {
+      Notification.error(err.message);
+    } finally {
+      setIsProcessing(false);
     }
   };
-
 
   return (
     <Page width="100%">
@@ -135,9 +133,7 @@ const Upload: FC<UploadProps> = ({}) => {
                 </div>
 
                 <div className={styles.input_field}>
-                  <span>
-                    Enter Agent Description
-                  </span>
+                  <span>Enter Agent Description</span>
                   <Input
                     placeholder=""
                     onChange={(e) => setDescription(e.target.value)}
@@ -185,24 +181,29 @@ const Upload: FC<UploadProps> = ({}) => {
                   </span>
                   <DropDown
                     changeDefaultValue={setRequestMethod}
-                    valuesList={["POST","PUT"]}
+                    valuesList={["POST", "PUT"]}
                     defaultValue={requestMethod}
                   />
                 </div>
 
-                <div className={styles.input_field} style={{marginTop:"20px"}}>
-                  <span>Specify the Request Body Format (example structure expected when calling your API</span>
-                  <textarea onChange={(e)=> {setRequestBody(e.target.value);console.log(requestBody)}}>
+                <div
+                  className={styles.input_field}
+                  style={{ marginTop: "20px" }}
+                >
+                  <span>
+                    Specify the Request Body Format (example structure expected
+                    when calling your API
+                  </span>
+                  <textarea onChange={(e) => setRequestBody(e.target.value)}>
                     {JSON.stringify(requestBody)}
                   </textarea>
                 </div>
 
-
                 <div className={styles.input_field}>
                   <span>Agent Trained On (include links, topics, etc)</span>
                   <Input
-                  value={trainedOnTxt}
-                  onChange={(e)=> setTrainedOnTxt(e.target.value)}
+                    value={trainedOnTxt}
+                    onChange={(e) => setTrainedOnTxt(e.target.value)}
                     placeholder=""
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -212,13 +213,24 @@ const Upload: FC<UploadProps> = ({}) => {
                           //@ts-ignore
                           e.target?.value,
                         ]);
-                        setTrainedOnTxt("")
+                        setTrainedOnTxt("");
                       }
                     }}
                   />
                   <div className={styles.tags_tags_tags}>
                     {trainedOn.map((data) => {
-                      return <span><AiOutlineClose onClick={()=> setTrainedOn((oldData)=> oldData.filter((tag)=> tag !== data))}/> {data}</span>;
+                      return (
+                        <span>
+                          <AiOutlineClose
+                            onClick={() =>
+                              setTrainedOn((oldData) =>
+                                oldData.filter((tag) => tag !== data)
+                              )
+                            }
+                          />{" "}
+                          {data}
+                        </span>
+                      );
                     })}
                   </div>
                 </div>
@@ -226,22 +238,32 @@ const Upload: FC<UploadProps> = ({}) => {
                 <div className={styles.input_field}>
                   <span>Add Agent Tags</span>
                   <Input
-                  value={tagTxt}
-                  onChange={(e)=> setTagTxt(e.target.value)}
+                    value={tagTxt}
+                    onChange={(e) => setTagTxt(e.target.value)}
                     placeholder=""
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
                         //@ts-ignore
                         setTags((oldData) => [...oldData, e.target?.value]);
-                        setTagTxt("")
+                        setTagTxt("");
                       }
                     }}
-
                   />
                   <div className={styles.tags_tags_tags}>
                     {tags.map((data) => {
-                      return <span><AiOutlineClose onClick={()=> setTags((oldData)=> oldData.filter((tag)=> tag !== data))}/> {data}</span>;
+                      return (
+                        <span>
+                          <AiOutlineClose
+                            onClick={() =>
+                              setTags((oldData) =>
+                                oldData.filter((tag) => tag !== data)
+                              )
+                            }
+                          />{" "}
+                          {data}
+                        </span>
+                      );
                     })}
                   </div>
                 </div>
@@ -326,18 +348,12 @@ const Upload: FC<UploadProps> = ({}) => {
 
                 <div className={styles.input_field}>
                   <span>Owner Wallet Address</span>
-                  <Input
-                    placeholder=""
-                    value={loggedInUser?.walletAddress}
-                  />
+                  <Input placeholder="" value={loggedInUser?.walletAddress} />
                 </div>
 
                 <div className={styles.input_field}>
                   <span>Creator Wallet Address</span>
-                  <Input
-                    placeholder=""
-                    value={loggedInUser?.walletAddress}
-                  />
+                  <Input placeholder="" value={loggedInUser?.walletAddress} />
                 </div>
               </section>
 
@@ -349,7 +365,9 @@ const Upload: FC<UploadProps> = ({}) => {
                   </span>
                   <Input
                     //  value={costPerCredit}
-                    onChange={(e) => setCostPerCredit(parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      setCostPerCredit(parseFloat(e.target.value))
+                    }
                     type="number"
                     min={0.001}
                     max={0.08}
@@ -393,9 +411,8 @@ const Upload: FC<UploadProps> = ({}) => {
                     source={markdownText}
                   />
                 </div>
-              {/* <MDEditor.Markdown source={`# How are ou`} style={{ whiteSpace: 'pre-wrap',height:"500px" }} /> */}
+                {/* <MDEditor.Markdown source={`# How are ou`} style={{ whiteSpace: 'pre-wrap',height:"500px" }} /> */}
               </div>
-
             </section>
           )}
           <div>
@@ -407,11 +424,29 @@ const Upload: FC<UploadProps> = ({}) => {
               />
             )}
             {formSection == 0 ? (
-              <Button className={styles.nor_button} onClick={() => setFormSection(1)}>Next</Button>
+              <Button
+                className={styles.nor_button}
+                onClick={() => setFormSection(1)}
+              >
+                Next
+              </Button>
             ) : (
               <>
-                <Button className={styles.nor_button} onClick={() => setFormSection(0)}>Prev</Button>{" "}
-                {confirmSubmission && <Button className={styles.main_button} onClick={createAgent} disabled={!confirmSubmission}>Submit for Review</Button>}
+                <Button
+                  className={styles.nor_button}
+                  onClick={() => setFormSection(0)}
+                >
+                  Prev
+                </Button>{" "}
+                {confirmSubmission && (
+                  <Button
+                    className={styles.main_button}
+                    onClick={createAgent}
+                    disabled={!confirmSubmission}
+                  >
+                    Submit for Review
+                  </Button>
+                )}
               </>
             )}
           </div>
