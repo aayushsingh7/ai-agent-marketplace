@@ -20,14 +20,14 @@ app.use(express.json())
 // Just for Simulating Agents (not server code) -------------------------------------------
 app.post("/api/v1/trading-agent", async(req,res)=> {
     res.status(200).json({
-       data:"This will be the response from AI Agents hosted on your's sever or cloud service",
+       data:"This is the sample ai agent response",
        success:true,
     })
 })
 
 app.post("/api/v1/booking-agent", async(req,res)=> {
     res.status(200).json({
-       data:"This will be the response from AI Agents hosted on your's sever or cloud service",
+       data:"This is the sample ai agent response",
        success:true,
     })
 })
