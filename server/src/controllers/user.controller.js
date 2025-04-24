@@ -57,6 +57,7 @@ class UserController {
   async getUserCredit(req, res) {
     try {
       const { userID, agentID } = req.params;
+      console.log({userID,agentID})
       const credit = await this.credit.findOne({
         user: userID,
         agent: agentID,

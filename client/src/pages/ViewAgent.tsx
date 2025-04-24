@@ -161,6 +161,16 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
 
+
+      const loggedInUserWallet = loggedInUser?.walletAddress
+      const signerWallet = address
+
+      if(loggedInUserWallet.toLowerCase() != signerWallet.toLowerCase()) {
+        Notification.error("Please use the Wallet you signed in with")
+        Notification.info("Maybe you have selected different account in metamask wallet")
+        return;
+      }
+
       const balance = await signer.provider.getBalance(
         loggedInUser?.walletAddress
       );
@@ -231,7 +241,8 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
             transactionHash: receipt.hash,
             agentID: agentDetails._id,
             tokenID: agentDetails.tokenId,
-            creditAmount: credits,
+            creditAmount: credits * agentDetails?.rentingDetails?.costPerCredit,
+            credits,
             walletAddress: address,
             gasFee: gasFee.toString(),
             gasFeeInEth: gasFeeInEth,
@@ -296,6 +307,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
 
 
   useEffect(()=> {
+    console.log(loggedInUser)
     getAgentCreditCost()
   },[agentDetails])
   return (

@@ -67,6 +67,7 @@ class WalletController {
         tokenID,
         creditAmount,
         walletAddress,
+        credits,
         gasFee,
         gasFeeInEth,
       } = req.body;
@@ -77,6 +78,7 @@ class WalletController {
         tokenID,
         creditAmount,
         walletAddress,
+        credits,
         gasFee,
         gasFeeInEth
       );

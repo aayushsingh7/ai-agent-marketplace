@@ -282,28 +282,28 @@ class WalletService {
           400
         );
       }
-  
+
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
-  
+
       let user = await this.user.findOne({
         walletAddress: userAddress.toLowerCase(),
       });
-  
+
       if (!user)
         throw new CustomError(
           "User account not found. Please connect your wallet address to continue.",
           404
         );
-  
+
       const provider = new ethers.JsonRpcProvider(this.rpcUrl);
       const contract = new ethers.Contract(this.contractAddress, ABI, provider);
       const creditCost = await contract.getAgentCreditCost(tokenId);
       const creditAmountBigInt = BigInt(creditAmount);
       const totalCostInWei = creditCost * creditAmountBigInt;
-      
+
       return {
         contractAddress: this.contractAddress,
         contractABI: ABI,
@@ -322,15 +322,16 @@ class WalletService {
       );
     }
   }
- 
+
   async recordCreditPurchase(
     txHash,
     agentID,
     tokenId,
     creditAmount,
     userAddress,
+    credits,
     gasFee,
-    gasFeeInEth
+    gasFeeInEth,
   ) {
     try {
       const agent = await this.agent.findOne({ _id: agentID });
@@ -353,7 +354,19 @@ class WalletService {
       });
 
       if (userCredit) {
-        userCredit.totalCredits += creditAmount;
+        userCredit.totalCredits += credits;
+        userCredit.history = [
+          ...userCredit.history,
+          {
+            type: "Purchased",
+            totalCreditPurchased:credits,
+            amount: creditAmount,
+            reason: "Purchased more credits",
+            timestamp: new Date().toISOString(),
+            gasFree: gasFee,
+            transactionHash: txHash,
+          },
+        ];
         await userCredit.save();
       } else {
         userCredit = new this.credit({
@@ -368,10 +381,11 @@ class WalletService {
             {
               type: "Purchased",
               amount: creditAmount,
-              reason: "Purchased new credits",
+              reason: "Purchased more credits",
               timestamp: new Date().toISOString(),
               gasFree: gasFee,
               transactionHash: txHash,
+              totalCreditPurchased:credits,
             },
           ],
         });
@@ -606,16 +620,18 @@ class WalletService {
   }
 
   async getAgentCreditCost(tokenID) {
-    console.log("==============================================")
     try {
       const provider = new ethers.JsonRpcProvider(this.rpcUrl);
       const contract = new ethers.Contract(this.contractAddress, ABI, provider);
       const creditCost = await contract.getAgentCreditCost(tokenID);
-      console.log(creditCost.toString())
+      console.log(creditCost.toString());
       return creditCost.toString();
     } catch (error) {
-      console.error('Error getting agent credit cost:', error);
-      throw new CustomError("Oops! something went wrong file getting agent credit cost", 400)
+      console.error("Error getting agent credit cost:", error);
+      throw new CustomError(
+        "Oops! something went wrong file getting agent credit cost",
+        400
+      );
     }
   }
 }

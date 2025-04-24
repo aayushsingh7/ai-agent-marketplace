@@ -11,6 +11,7 @@ const userCreditsSchema = new Schema(
     walletAddress:{type:String,required:true},
     history: [
       {
+        totalCreditPurchased:{type:Number,default:1},
         type: { type: String, enum: ["Purchased", "Used", "Bonus", "Refunded"] },
         amount: { type: Number, required: true },
         reason: { type: String, required: true },

@@ -97,7 +97,11 @@ const Usage: FC<UsageProps> = ({}) => {
                   </tr>
                   <tr>
                     <td>Credits Bought:</td>
-                    <td>{history?.amount}</td>
+                    <td>{history?.totalCreditPurchased}</td>
+                  </tr>
+                  <tr>
+                    <td>Total SEI Spent:</td>
+                    <td>{history?.amount} SEI</td>
                   </tr>
                 </tbody>
               </table>
