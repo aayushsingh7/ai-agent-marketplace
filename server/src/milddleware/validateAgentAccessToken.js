@@ -6,7 +6,8 @@ const validateAgentAccessToken = (req, res, next) => {
   if (!token) {
     return res.status(401).send({ message: "No token provided", success: false });
   }
-
+  
+  
   if(token.startsWith("owner-privilage")) {
    req.userID = token.split("-").pop();
    req.requestType = "owner-privilage";

@@ -297,7 +297,6 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       Notification.error(err.message);
     }
   };
-
   const getAgentCreditCost = async()=> {
     if(!agentDetails) return;
     const data = await fetch(`${import.meta.env.VITE_API_URL}/wallets/get-agent-credit-cost?tokenID=${agentDetails?.tokenId}`)
@@ -375,7 +374,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                           </tr>
                           <tr>
                             <td>Is Agent For Sale:</td>
-                            <td>{agentDetails.isForSale}</td>
+                            <td>{agentDetails.isForSale ? "Yes" : "No"}</td>
                           </tr>
                           <tr>
                             <td>Agent Sale Price:</td>

@@ -36,7 +36,7 @@ const agentSchema = new Schema(
     ownershipHistory: [
       {
         owner: { type: String },
-        type: { type: String, enum: ["Transfered", "Purchased", "Minted"] },
+        type: { type: String, enum: ["Transfered", "Purchased", "Minted", "Updated"] },
         timestamp: { type: Date, default: Date.now },
         gasFee: { type: Number },
         transactionHash: { type: String }

@@ -91,7 +91,7 @@ const Auth = () => {
         method: "eth_requestAccounts",
       });
 
-      const address = accounts[2];
+      const address = accounts[1];
       setWalletAddress(address);
 
       // Once we have the address, we can try to switch networks

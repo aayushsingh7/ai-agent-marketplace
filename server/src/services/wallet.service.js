@@ -331,7 +331,7 @@ class WalletService {
     userAddress,
     credits,
     gasFee,
-    gasFeeInEth,
+    gasFeeInEth
   ) {
     try {
       const agent = await this.agent.findOne({ _id: agentID });
@@ -359,7 +359,7 @@ class WalletService {
           ...userCredit.history,
           {
             type: "Purchased",
-            totalCreditPurchased:credits,
+            totalCreditPurchased: credits,
             amount: creditAmount,
             reason: "Purchased more credits",
             timestamp: new Date().toISOString(),
@@ -385,7 +385,7 @@ class WalletService {
               timestamp: new Date().toISOString(),
               gasFree: gasFee,
               transactionHash: txHash,
-              totalCreditPurchased:credits,
+              totalCreditPurchased: credits,
             },
           ],
         });
@@ -492,14 +492,16 @@ class WalletService {
 
   async prepareUpdateAgent(
     agentID,
-    tokenId,
-    newCreditCost,
+    tokenID,
+    newCostPerCredit,
     newSalePrice,
-    forSale,
+    newCreditCostPerRequest,
+    newIsForSale,
     walletAddress
   ) {
     try {
-      if (!tokenId || !agentID || !walletAddress) {
+      console.log({ tokenID, agentID, walletAddress });
+      if (!tokenID || !agentID || !walletAddress) {
         throw new CustomError("Invalid input parameters", 400);
       }
 
@@ -520,14 +522,25 @@ class WalletService {
         );
       }
 
+      const newCostPerCreditInWei = ethers.parseEther(`${newCostPerCredit}`);
+
       return {
         contractAddress: this.contractAddress,
         contractABI: ABI,
         method: "updateAgentInfo",
-        params: [tokenId, newCreditCost, newSalePrice, forSale],
+        params: [
+          tokenID,
+          newCostPerCreditInWei.toString(),
+          newSalePrice,
+          newIsForSale,
+        ],
         agentID,
-        tokenId,
+        tokenID,
         walletAddress,
+        newCreditCostPerRequest,
+        newCostPerCredit,
+        newSalePrice,
+        newIsForSale,
       };
     } catch (err) {
       console.error("Prepare update agent error:", err);
@@ -541,16 +554,17 @@ class WalletService {
   async confirmAgentUpdate(
     transactionHash,
     agentID,
-    tokenId,
-    newCreditCost,
+    tokenID,
+    newCostPerCredit,
     newSalePrice,
-    forSale,
+    newIsForSale,
+    newCreditCostPerRequest,
     walletAddress,
     gasFee,
     gasFeeInEth
   ) {
     try {
-      if (!transactionHash || !agentID || !tokenId || !walletAddress) {
+      if (!transactionHash || !agentID || !tokenID || !walletAddress) {
         throw new CustomError("Invalid input parameters", 400);
       }
 
@@ -571,26 +585,25 @@ class WalletService {
         throw new CustomError("Agent not found", 404);
       }
 
-      // Update agent details based on actual schema fields
-      // Update credit cost
-      if (agent.rentingDetails) {
-        agent.rentingDetails.costPerCredit = newCreditCost;
-      } else {
-        agent.rentingDetails = {
-          costPerCredit: Number(ethers.formatEther(newCreditCost)),
-          creditCostPerReq: agent.rentingDetails?.creditCostPerReq || 1,
-        };
-      }
+      agent.rentingDetails = {
+        costPerCredit: newCostPerCredit,
+        creditCostPerReq: newCreditCostPerRequest || 1,
+      };
 
       // Update sale price and status
-      agent.isForSale = forSale;
+      agent.isForSale = newIsForSale;
       agent.salePrice = newSalePrice;
 
-      // Add to ownership history
-      agent.ownershipHistory = agent.ownershipHistory || [];
+      console.log({
+        newIsForSale,
+        newSalePrice,
+        newCostPerCredit,
+        newCreditCostPerRequest,
+      });
+
       agent.ownershipHistory.push({
         owner: walletAddress.toLowerCase(),
-        type: "Updated", // Adding a new event type for price updates
+        type: "Updated",
         timestamp: new Date(),
         gasFee: Number(gasFeeInEth),
         transactionHash: transactionHash,
@@ -600,15 +613,11 @@ class WalletService {
       await agent.save();
 
       return {
-        success: true,
-        message: "Agent information updated successfully",
-        agent: {
-          id: agent._id,
-          tokenId: agent.tokenId,
-          rentingDetails: agent.rentingDetails,
-          isForSale: agent.isForSale,
-          salePrice: agent.salePrice,
-        },
+        id: agent._id,
+        tokenId: agent.tokenId,
+        rentingDetails: agent.rentingDetails,
+        isForSale: agent.isForSale,
+        salePrice: agent.salePrice,
       };
     } catch (err) {
       console.error("Confirm agent update error:", err);

@@ -14,9 +14,7 @@ class WalletController {
     this.getAgentCreditCost = this.getAgentCreditCost.bind(this);
   }
 
-
   async createAgent(req, res) {
-  
     const { recipient, agentData, gasLimit } = req.body;
     try {
       const agent = await this.walletService.createAgent(
@@ -33,7 +31,6 @@ class WalletController {
       res.status(err.statusCode).send({ success: false, message: err.message });
     }
   }
-
 
   async prepareBuyCredits(req, res) {
     try {
@@ -153,18 +150,20 @@ class WalletController {
       const {
         agentID,
         tokenID,
-        newCreditCost,
+        newCostPerCredit,
         newSalePrice,
-        forSale,
+        newCreditCostPerRequest,
+        newIsForSale,
         walletAddress,
       } = req.body;
 
       const txData = await this.walletService.prepareUpdateAgent(
         agentID,
         tokenID,
-        newCreditCost,
+        newCostPerCredit,
         newSalePrice,
-        forSale,
+        newCreditCostPerRequest,
+        newIsForSale,
         walletAddress
       );
 
@@ -188,9 +187,10 @@ class WalletController {
         transactionHash,
         agentID,
         tokenID,
-        newCreditCost,
+        newCostPerCredit,
         newSalePrice,
-        forSale,
+        newIsForSale,
+        newCreditCostPerRequest,
         walletAddress,
         gasFee,
         gasFeeInEth,
@@ -200,9 +200,10 @@ class WalletController {
         transactionHash,
         agentID,
         tokenID,
-        newCreditCost,
+        newCostPerCredit,
         newSalePrice,
-        forSale,
+        newIsForSale,
+        newCreditCostPerRequest,
         walletAddress,
         gasFee,
         gasFeeInEth
@@ -222,13 +223,17 @@ class WalletController {
     }
   }
 
-  async getAgentCreditCost(req,res) {
-    const {tokenID} = req.query;
+  async getAgentCreditCost(req, res) {
+    const { tokenID } = req.query;
     try {
       const creditCost = await this.walletService.getAgentCreditCost(tokenID);
-      res.status(200).send({success:true,message:"Credit cost fetched successfully", data:creditCost})
+      res.status(200).send({
+        success: true,
+        message: "Credit cost fetched successfully",
+        data: creditCost,
+      });
     } catch (error) {
-      console.error('Error getting agent credit cost:', error);
+      console.error("Error getting agent credit cost:", error);
       throw error;
     }
   }
