@@ -11,6 +11,7 @@ class WalletController {
     this.createAgent = this.createAgent.bind(this);
     this.prepareUpdateAgent = this.prepareUpdateAgent.bind(this);
     this.confirmAgentUpdate = this.confirmAgentUpdate.bind(this);
+    this.getAgentCreditCost = this.getAgentCreditCost.bind(this);
   }
 
 
@@ -216,6 +217,17 @@ class WalletController {
         success: false,
         message: err.message || "Failed to confirm update",
       });
+    }
+  }
+
+  async getAgentCreditCost(req,res) {
+    const {tokenID} = req.query;
+    try {
+      const creditCost = await this.walletService.getAgentCreditCost(tokenID);
+      res.status(200).send({success:true,message:"Credit cost fetched successfully", data:creditCost})
+    } catch (error) {
+      console.error('Error getting agent credit cost:', error);
+      throw error;
     }
   }
 }

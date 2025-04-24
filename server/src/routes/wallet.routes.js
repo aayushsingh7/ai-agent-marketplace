@@ -4,6 +4,7 @@ import authenticateUser from "../milddleware/authenticateUser.js";
 const walletRoutes = Router();
 const walletController = new WalletController();
 
+walletRoutes.get("/get-agent-credit-cost", walletController.getAgentCreditCost)
 walletRoutes.put("/mint", authenticateUser, walletController.createAgent);
 walletRoutes.post("/prepare-buy-credits",authenticateUser, walletController.prepareBuyCredits)
 walletRoutes.post("/confirm-credit-purchase",authenticateUser,walletController.confirmCreditPurchase)

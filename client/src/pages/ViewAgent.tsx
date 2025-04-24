@@ -199,16 +199,11 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         signer
       );
 
-      // Get the actual credit cost from contract for verification
-      const actualCreditCost = await contract.getAgentCreditCost("7");
 
-      // IMPORTANT: Calculate the total cost based on the contract's actual credit cost
-      const totalCostWei = BigInt(actualCreditCost) * BigInt(credits);
-
+      console.log(txData.data)
       setProcessingText("Executing The Transaction...");
-      // Execute the transaction with the correct value based on contract's credit cost
       const tx = await contract[txData.data.method](...txData.data.params, {
-        value: totalCostWei, // Use the cost from the contract, not from backend
+        value:txData.data.value,
       });
 
       setTxHash(tx.hash);
@@ -292,6 +287,17 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
     }
   };
 
+  const getAgentCreditCost = async()=> {
+    if(!agentDetails) return;
+    const data = await fetch(`${import.meta.env.VITE_API_URL}/wallets/get-agent-credit-cost?tokenID=${agentDetails?.tokenId}`)
+    const creditCost = await data.json();
+    console.log(creditCost)
+  }
+
+
+  useEffect(()=> {
+    getAgentCreditCost()
+  },[agentDetails])
   return (
     <>
       {agentDetails?._id && (

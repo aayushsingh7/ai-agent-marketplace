@@ -214,6 +214,60 @@ class WalletService {
     }
   }
 
+  // async prepareBuyCredits(agentID, tokenId, creditAmount, userAddress) {
+  //   try {
+  //     if (
+  //       !tokenId ||
+  //       !creditAmount ||
+  //       creditAmount <= 0 ||
+  //       !agentID ||
+  //       !userAddress
+  //     ) {
+  //       throw new CustomError(
+  //         "Invalid token ID, agent ID, user address or credit amount",
+  //         400
+  //       );
+  //     }
+
+  //     const agent = await this.agent.findOne({ _id: agentID });
+  //     if (!agent) {
+  //       throw new CustomError("Agent not found", 404);
+  //     }
+
+  //     let user = await this.user.findOne({
+  //       walletAddress: userAddress.toLowerCase(),
+  //     });
+
+  //     if (!user)
+  //       throw new CustomError(
+  //         "User account not found. Please connect your wallet address to continue.",
+  //         404
+  //       );
+
+  //     const provider = new ethers.JsonRpcProvider(this.rpcUrl);
+  //     const contract = new ethers.Contract(this.contractAddress, ABI, provider);
+  //     const creditCost = await contract.getAgentCreditCost(tokenId);
+
+  //     const totalCostInWei = creditCost * BigInt(creditAmount);
+  //     return {
+  //       contractAddress: this.contractAddress,
+  //       contractABI: ABI,
+  //       method: "buyCredit",
+  //       params: [tokenId, creditAmount],
+  //       value: totalCostInWei.toString(),
+  //       agentID,
+  //       creditAmount,
+  //       userAddress,
+  //     };
+  //   } catch (err) {
+  //     console.error("Prepare buy credits error:", err);
+  //     throw new CustomError(
+  //       err.message || "Failed to prepare buy credits transaction",
+  //       500
+  //     );
+  //   }
+  // }
+
   async prepareBuyCredits(agentID, tokenId, creditAmount, userAddress) {
     try {
       if (
@@ -228,28 +282,28 @@ class WalletService {
           400
         );
       }
-
+  
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
         throw new CustomError("Agent not found", 404);
       }
-
+  
       let user = await this.user.findOne({
         walletAddress: userAddress.toLowerCase(),
       });
-
+  
       if (!user)
         throw new CustomError(
           "User account not found. Please connect your wallet address to continue.",
           404
         );
-
+  
       const provider = new ethers.JsonRpcProvider(this.rpcUrl);
       const contract = new ethers.Contract(this.contractAddress, ABI, provider);
       const creditCost = await contract.getAgentCreditCost(tokenId);
-
-      const totalCostInWei = creditCost * BigInt(creditAmount);
-
+      const creditAmountBigInt = BigInt(creditAmount);
+      const totalCostInWei = creditCost * creditAmountBigInt;
+      
       return {
         contractAddress: this.contractAddress,
         contractABI: ABI,
@@ -268,7 +322,7 @@ class WalletService {
       );
     }
   }
-
+ 
   async recordCreditPurchase(
     txHash,
     agentID,
@@ -548,6 +602,20 @@ class WalletService {
         err.message || "Failed to confirm agent update",
         err.statusCode || 500
       );
+    }
+  }
+
+  async getAgentCreditCost(tokenID) {
+    console.log("==============================================")
+    try {
+      const provider = new ethers.JsonRpcProvider(this.rpcUrl);
+      const contract = new ethers.Contract(this.contractAddress, ABI, provider);
+      const creditCost = await contract.getAgentCreditCost(tokenID);
+      console.log(creditCost.toString())
+      return creditCost.toString();
+    } catch (error) {
+      console.error('Error getting agent credit cost:', error);
+      throw new CustomError("Oops! something went wrong file getting agent credit cost", 400)
     }
   }
 }
