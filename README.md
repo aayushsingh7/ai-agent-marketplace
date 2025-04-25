@@ -9,7 +9,7 @@
 ## 🔗 Live Demo
 
 Watch the full demo (includes problem, solution, and presentation):  
-**[https://youtu.be/Q0pQrhaVph8?si=XnzXw6Gt_fdeZlgr](https://youtu.be/Q0pQrhaVph8?si=XnzXw6Gt_fdeZlgr)**
+**[https://youtu.be/FxiB7eys_oc](https://youtu.be/FxiB7eys_oc)**
 
 ---
 
