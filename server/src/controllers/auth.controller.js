@@ -33,6 +33,7 @@ class AuthController {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           path: "/",
+          sameSite:"None"
         })
         .status(200)
         .send({
