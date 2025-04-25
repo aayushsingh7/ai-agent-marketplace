@@ -450,12 +450,10 @@ class WalletService {
     walletAddress
   ) {
     try {
-      console.log({ tokenID, agentID, walletAddress });
       if (!tokenID || !agentID || !walletAddress) {
         throw new CustomError("Invalid input parameters", 400);
       }
 
-      // Verify agent exists
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
         throw new CustomError("Agent not found", 404);
@@ -544,13 +542,6 @@ class WalletService {
       agent.isForSale = newIsForSale;
       agent.salePrice = newSalePrice;
 
-      console.log({
-        newIsForSale,
-        newSalePrice,
-        newCostPerCredit,
-        newCreditCostPerRequest,
-      });
-
       agent.ownershipHistory.push({
         owner: walletAddress.toLowerCase(),
         type: "Updated",
@@ -583,7 +574,6 @@ class WalletService {
       const provider = new ethers.JsonRpcProvider(this.rpcUrl);
       const contract = new ethers.Contract(this.contractAddress, ABI, provider);
       const creditCost = await contract.getAgentCreditCost(tokenID);
-      console.log(creditCost.toString());
       return creditCost.toString();
     } catch (error) {
       console.error("Error getting agent credit cost:", error);
