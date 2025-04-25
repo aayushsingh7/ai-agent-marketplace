@@ -192,6 +192,7 @@ tr:nth-child(even) {
 
 .section_four{
   transition: 0.5s ease-in-out;
+  height: 100%;
 }
 
 .try_api {
@@ -249,6 +250,7 @@ tr:nth-child(even) {
   }
   .section_four {
     position: fixed;
+    overflow-y: scroll;
     width: 50%;
     padding: 20px;
     top: 0%;

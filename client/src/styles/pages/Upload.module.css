@@ -121,14 +121,26 @@
     margin-right:5px;
 }
 
+
+.form_section h3{
+    display: flex !important;
+}
+
 .tags_tags_tags span svg{
     margin-right: 5px;
     color: red;
     cursor: pointer;
 }
 
+@media (max-width:1000px) {
+    .markdown_container textarea{
+        font-size: 0.8rem;
+    }
+}
+
 @media (max-width:700px) {
     .sixty{
         width: 100%;
     }
+    
 }

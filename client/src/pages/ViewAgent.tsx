@@ -54,11 +54,11 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
   const [userCredit, setUserCredit] = useState<any>({});
   const [customValue, setCustomValue] = useState<boolean>(false);
   const [tryAgentAPI, setTryAgentAPI] = useState<boolean>(false);
-  const [requestBody, setRequestBody] = useState();
+  const [requestBody, setRequestBody] = useState<any>({status:"Loading..."});
 
   const templateCode: any = {
     javascript: `
-      fetch("http://localhost:4000/api/v1/agents/use?agentID=${
+      fetch("${import.meta.env.VITE_API_URL}/agents/use?agentID=${
         agentDetails?._id
       }", {
         method: "${agentDetails?.requestMethod}",
@@ -73,7 +73,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
           }"
         },
         credentials: "include",
-        body: ${requestBody}
+        body: JSON.stringif(${JSON.stringify(requestBody)?.replace(/"([^"]+)":/g, '$1:')}),
       })
         .then(response => response.json())
         .then(data => console.log(data))
@@ -84,7 +84,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       import requests
       import json
   
-      url = "http://localhost:4000/api/v1/agents/use?agentID=${
+      url = "${import.meta.env.VITE_API_URL}/agents/use?agentID=${
         agentDetails?._id
       }"
   
@@ -105,7 +105,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         ${
           agentDetails?.requestMethod?.toUpperCase() === "GET"
             ? ""
-            : `data=${requestBody}`
+            : `data=${JSON.stringify(requestBody)?.replace(/"([^"]+)":/g, '$1:')}`
         }
       )
   
@@ -134,7 +134,8 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       const data = await response.json();
       setAgentDetails(data.data);
       setSelectedAgent(data.data);
-      setRequestBody(JSON.parse(data.data.requestBody));
+      console.log(data.data.requestBody)
+      setRequestBody(JSON.stringify(data.data.requestBody));
     } catch (err) {
       Notification.error("Oops! something went wrong while fetching agents");
     }
@@ -318,7 +319,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                 ? userCredit?.accessToken
                 : "trail-use-" + loggedInUser?._id,
           },
-          body: requestBody,
+          body: JSON.stringify(requestBody),
           credentials: "include",
         }
       );
@@ -702,7 +703,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                   <div className={styles.code_highlighter}>
                     <h4>Requeset Body</h4>
                     <textarea
-                      value={requestBody}
+                      value={JSON.stringify(requestBody)?.replace(/"([^"]+)":/g, '$1:')}
                       className={styles.requestBody}
                       //@ts-ignore
                       onChange={(e) => setRequestBody(e.target.value)}

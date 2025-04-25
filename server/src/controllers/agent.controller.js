@@ -107,8 +107,9 @@ class AgentController {
 
       const agent = await this.agent.findOne({ _id: agentID });
       let agentResponse = await fetch(originalAPI, {
+        headers:{"Content-Type":"application/json"},
         method: agent.requestMethod,
-        body: req.body,
+        body: JSON.stringify(req.body),
         credentials: "include",
       });
       let agentData = await agentResponse.json();

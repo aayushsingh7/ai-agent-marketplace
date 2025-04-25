@@ -74,7 +74,7 @@ const Upload: FC<UploadProps> = ({}) => {
         documentation: markdownText,
         deployedAPI: deployedURL,
         requestMethod,
-        requestBody: JSON.stringify(requestBody),
+        requestBody: requestBody,
         rentingDetails: {
           costPerCredit: costPerCredit,
           creditCostPerReq: creditCostPerReq,
@@ -224,7 +224,7 @@ const Upload: FC<UploadProps> = ({}) => {
                 >
                   <span>
                     Specify the Request Body Format (example structure expected
-                    when calling your API
+                    when calling your API) [JSON]
                   </span>
                   <textarea onChange={(e) => setRequestBody(e.target.value)}>
                     {JSON.stringify(requestBody)}
