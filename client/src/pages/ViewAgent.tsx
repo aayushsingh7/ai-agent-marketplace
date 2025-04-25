@@ -49,7 +49,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
     useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] =
     useState<string>("Javascript");
-  const [credits, setCredits] = useState<number>(100);
+  const [credits, setCredits] = useState<number>(0);
 
   const [userCredit, setUserCredit] = useState<any>({});
   const [customValue, setCustomValue] = useState<boolean>(false);
@@ -171,6 +171,10 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
   const [tryAgentResponse, setTryAgentResponse] = useState<string>("");
 
   const buyCredits = async () => {
+    if(credits == 0) {
+      Notification.error("Please select a valid custom value")
+      return;
+    }
     //@ts-ignore
     if (!window.ethereum) {
       Notification.error(
@@ -650,9 +654,9 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                             }
                             type="number"
                             max={5000}
-                            min={5}
-                            defaultValue={10}
-                            step={1}
+                            min={0}
+                            defaultValue={0}
+                            step={5}
                           />
                         ) : (
                           "Custom"
