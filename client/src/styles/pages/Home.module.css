@@ -1,41 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&display=swap");
 
 .home_page {
-    padding: 0px 50px;
+  padding: 0px 50px;
 }
 
-
-.home_page h2{
-    font-family: "Special Gothic Expanded One", sans-serif;
-    font-size: 2rem;
-    margin-bottom: 40px;
-}
-
-.home_page nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 30px 0px;
-}
-
-.home_page nav h3 {
-  display: flex;
-  align-items: center;
-  font-size: 1.1rem;
-  color: #b30000;
-}
-
-.home_page nav h3 span {
-  color: #000;
-}
-
-.home_page nav button {
-  font-size: 0.8rem;
-  padding: 10px 15px;
-  color: #ffffff;
-  background: #b30000;
-  font-weight: 600;
-  border-radius: 10px;
+.home_page h2 {
+  font-family: "Special Gothic Expanded One", sans-serif;
+  font-size: 2rem;
+  margin-bottom: 40px;
 }
 
 .hero_section {
@@ -81,8 +53,8 @@
 
 .how_it_works,
 .features {
-margin-top: 20px;
-border-radius: 20px;
+  margin-top: 20px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,12 +62,11 @@ border-radius: 20px;
   padding: 60px;
 }
 
-.how_it_works{
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+.how_it_works {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
-
-.steps{
+.steps {
   width: 100%;
   position: relative;
   place-items: center;
@@ -105,12 +76,9 @@ border-radius: 20px;
   column-gap: 30px;
 }
 
-
-
 .steps {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
-
 
 .step {
   border: 2px solid #dfdfdf;
@@ -154,42 +122,81 @@ border-radius: 20px;
   width: 77%;
 }
 
-.features_grid{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    row-gap: 20px;
-    column-gap: 20px
+.features_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 20px;
+  column-gap: 20px;
 }
 
-.features_grid figure{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    /* box-shadow: rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset; */
-    border: 3px solid #dfdfdf;
-    padding: 20px;
-    border-radius: 10px;
+.features_grid figure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  /* box-shadow: rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset; */
+  border: 3px solid #dfdfdf;
+  padding: 20px;
+  border-radius: 10px;
 }
 
-.features_grid figure svg{
-    font-size: 60px;
-    color: #b30000;
-    margin-bottom: 20px;
-    /* padding: 40px; */
+.features_grid figure svg {
+  font-size: 60px;
+  color: #b30000;
+  margin-bottom: 20px;
+  /* padding: 40px; */
 }
 
 .features_grid h3 {
-    text-align: center;
-    color: var(--primary-color);
-    padding: 10px;
-    font-size: 0.7rem;
+  text-align: center;
+  color: var(--primary-color);
+  padding: 10px;
+  font-size: 0.7rem;
+}
+
+.features_grid p {
+  font-size: 0.7rem;
+  padding: 10px;
+  text-align: center;
+  /* line-height: 1em; */
+}
+
+@media (max-width: 600px) {
+  .hero_section_texts h1 {
+    font-size: 2rem;
+    line-height: 2.5rem;
   }
-  
-  .features_grid p {
-    font-size: 0.7rem;
-    padding: 10px;
-    text-align: center;
-    /* line-height: 1em; */
+  .home_page {
+    padding: 0px 20px;
   }
-  
+}
+
+@media (max-width: 850px) {
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .features {
+    padding: 60px 0px;
+  }
+  .coo {
+    display: none;
+  }
+  .how_it_works{
+    padding: 20px;
+  }
+}
+
+@media (max-width: 650px) {
+  .features_grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .steps {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  .features_grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}

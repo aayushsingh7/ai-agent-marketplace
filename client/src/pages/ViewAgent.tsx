@@ -15,6 +15,10 @@ import { useAppContext } from "../context/contextAPI";
 import { ethers } from "ethers";
 import PaymentBill from "../components/PaymentBill";
 import Notification from "../utils/notification";
+import Usage from "../layouts/Usage";
+import Navbar from "../layouts/Navbar";
+import { AiOutlineClose } from "react-icons/ai";
+import Loading from "../components/Loading";
 
 interface ViewAgentProps {}
 
@@ -26,6 +30,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
     setIsProcessing,
     setProcessingDescription,
     setProcessingText,
+    setAgentUsage,
   } = useAppContext();
   const [selectedSection, setSelectedSection] = useState<number>(1);
   const navigate = useNavigate();
@@ -37,6 +42,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
 
   const [userCredit, setUserCredit] = useState<any>({});
   const [customValue, setCustomValue] = useState<boolean>(false);
+  const [tryAgentAPI, setTryAgentAPI] = useState<boolean>(false);
   const [requestBody, setRequestBody] = useState(`{
     prompt:"give me the current trading market anaylsis"
     }`);
@@ -50,7 +56,9 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         headers: {
           "Content-Type": "application/json",
           "sei-agents-api-key": "${
-           loggedInUser?._id == agentDetails?.owner?._id ? "owner-privilage-" + loggedInUser?._id :  userCredit?.accessToken
+            loggedInUser?._id == agentDetails?.owner?._id
+              ? "owner-privilage-" + loggedInUser?._id
+              : userCredit?.accessToken
               ? userCredit?.accessToken
               : "trail-use-" + loggedInUser?._id
           }"
@@ -74,7 +82,9 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       headers = {
         "Content-Type": "application/json",
         "sei-agents-api-key": "${
-         loggedInUser?._id == agentDetails?.owner?._id ? "owner-privilage-" + loggedInUser?._id :  userCredit?.accessToken
+          loggedInUser?._id == agentDetails?.owner?._id
+            ? "owner-privilage-" + loggedInUser?._id
+            : userCredit?.accessToken
             ? userCredit?.accessToken
             : "trail-use-" + loggedInUser?._id
         }"
@@ -90,14 +100,13 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       `,
   };
 
-
   useEffect(() => {
     fetchAgentDetails(params.agentID || "");
   }, []);
 
-  useEffect(()=> {
-    setRequestBody(agentDetails?.requestBody)
-  },[agentDetails])
+  useEffect(() => {
+    setRequestBody(agentDetails?.requestBody);
+  }, [agentDetails]);
 
   useEffect(() => {
     fetchUserCredit();
@@ -129,18 +138,21 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       );
       const credit = await response.json();
       setUserCredit(credit.data);
+      if (credit.data?._id) {
+        setAgentUsage(true);
+      } else {
+        setAgentUsage(false);
+      }
     } catch (err) {
+      setAgentUsage(false);
     }
   };
 
- 
   const [error, setError] = useState("");
   const [txHash, setTxHash] = useState("");
   const [tryAgentResponse, setTryAgentResponse] = useState<string>("");
 
-
   const buyCredits = async () => {
-  
     //@ts-ignore
     if (!window.ethereum) {
       Notification.error(
@@ -161,20 +173,21 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
 
+      const loggedInUserWallet = loggedInUser?.walletAddress;
+      const signerWallet = address;
 
-      const loggedInUserWallet = loggedInUser?.walletAddress
-      const signerWallet = address
-
-      if(loggedInUserWallet.toLowerCase() != signerWallet.toLowerCase()) {
-        Notification.error("Please use the Wallet you signed in with")
-        Notification.info("Maybe you have selected different account in metamask wallet")
+      if (loggedInUserWallet.toLowerCase() != signerWallet.toLowerCase()) {
+        Notification.error("Please use the Wallet you signed in with");
+        Notification.info(
+          "Maybe you have selected different account in metamask wallet"
+        );
         return;
       }
 
       const balance = await signer.provider.getBalance(
         loggedInUser?.walletAddress
       );
-   
+
       // Step 1: Get transaction data from backend
       const prepareResponse = await fetch(
         `${import.meta.env.VITE_API_URL}/wallets/prepare-buy-credits`,
@@ -200,8 +213,6 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
 
       const txData = await prepareResponse.json();
 
-    
-
       // Debug: Check actual credit cost in contract
       const contract = new ethers.Contract(
         txData.data.contractAddress,
@@ -209,11 +220,10 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
         signer
       );
 
-
-      console.log(txData.data)
+      console.log(txData.data);
       setProcessingText("Executing The Transaction...");
       const tx = await contract[txData.data.method](...txData.data.params, {
-        value:txData.data.value,
+        value: txData.data.value,
       });
 
       setTxHash(tx.hash);
@@ -228,7 +238,6 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
 
       // Convert to a more readable format if needed
       const gasFeeInEth = ethers.formatEther(gasFee);
-
 
       // Step 5: Inform backend of successful purchase
       setProcessingText("Confirming The Transaction...");
@@ -284,9 +293,12 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "sei-agents-api-key":loggedInUser?._id == agentDetails?.owner?._id ? "owner-privilage-" + loggedInUser?._id :  userCredit?.accessToken
-              ? userCredit?.accessToken
-              : "trail-use-" + loggedInUser?._id,
+            "sei-agents-api-key":
+              loggedInUser?._id == agentDetails?.owner?._id
+                ? "owner-privilage-" + loggedInUser?._id
+                : userCredit?.accessToken
+                ? userCredit?.accessToken
+                : "trail-use-" + loggedInUser?._id,
           },
           credentials: "include",
         }
@@ -297,28 +309,34 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       Notification.error(err.message);
     }
   };
-  const getAgentCreditCost = async()=> {
-    if(!agentDetails) return;
-    const data = await fetch(`${import.meta.env.VITE_API_URL}/wallets/get-agent-credit-cost?tokenID=${agentDetails?.tokenId}`)
+  const getAgentCreditCost = async () => {
+    if (!agentDetails) return;
+    const data = await fetch(
+      `${import.meta.env.VITE_API_URL}/wallets/get-agent-credit-cost?tokenID=${
+        agentDetails?.tokenId
+      }`
+    );
     const creditCost = await data.json();
-    console.log(creditCost)
-  }
+    console.log(creditCost);
+  };
 
+  console.log(selectedSection);
 
-  useEffect(()=> {
-    console.log(loggedInUser)
-    getAgentCreditCost()
-  },[agentDetails])
+  useEffect(() => {
+    console.log(loggedInUser);
+    getAgentCreditCost();
+  }, [agentDetails]);
   return (
     <>
-      {agentDetails?._id && (
+      {agentDetails?._id ? (
         <div className="flex-page">
           <SideNav
             type="small"
             setTab={setSelectedSection}
             selectedTab={selectedSection}
           />
-          <Page width={"calc(100% - 250px)"}>
+          <Page width="fit">
+            <Navbar btn={false} />
             <Input
               placeholder="Search Agents (eg: Booking agents, Trading agents, etc..)"
               onKeyDown={(e) =>
@@ -327,7 +345,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                 navigate(`/marketplace?search=${e.target.value}`)
               }
             />
-            <div  className={styles.section_container}>
+            <div className={styles.section_container}>
               {selectedSection == 1 ? (
                 <section className={styles.section_one}>
                   <AgentBox
@@ -336,18 +354,27 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                     allowBorder={false}
                   />
 
-                 {agentDetails?.owner?.walletAddress != loggedInUser?.walletAddress &&  <div className={styles.agent_option}>
-                    {agentDetails.status == 1 && (
-                      <Button onClick={() => setSelectedSection(3)}>
-                        Rent Agent
-                      </Button>
+                  <div className={styles.agent_option}>
+                    {agentDetails?.owner?.walletAddress !==
+                      loggedInUser?.walletAddress && (
+                      <>
+                        {agentDetails.status === 1 && (
+                          <Button onClick={() => setSelectedSection(3)}>
+                            Rent Agent
+                          </Button>
+                        )}
+                        {agentDetails.isForSale && (
+                          <Button onClick={() => setShowBuyAgent(true)}>
+                            Buy NFT
+                          </Button>
+                        )}
+                      </>
                     )}
-                    {agentDetails.isForSale && (
-                      <Button onClick={() => setShowBuyAgent(() => true)}>
-                        Buy NFT
-                      </Button>
-                    )}
-                  </div>}
+
+                    <Button className={styles.try_api} onClick={() => setTryAgentAPI(true)}>
+                      Try API
+                    </Button>
+                  </div>
 
                   <div className={styles.more_details}>
                     <div className={styles.agent_info}>
@@ -360,7 +387,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                           </tr>
                         </thead>
                         <tbody>
-                        <tr>
+                          <tr>
                             <td>Agent Token ID:</td>
                             <td>{agentDetails?.tokenId || "N/A"}</td>
                           </tr>
@@ -601,17 +628,32 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                     </div>
                   </div>
                 </section>
-              ) : null}
-              {selectedSection != 3 ? (
-                <section className={styles.section_four}>
-                  <h4>Try API</h4>
+              ) : (
+                <Usage userCredit={userCredit} />
+              )}
+
+              {selectedSection == 1 || selectedSection == 2 ? (
+                <section
+                  className={`${styles.section_four} ${
+                    tryAgentAPI ? styles.show_request : styles.hide_request
+                  }`}
+                >
+                  <h4>
+                    <span>Try API</span>{" "}
+                    <AiOutlineClose
+                      style={{ fontSize: "25px" }}
+                      onClick={() => setTryAgentAPI(false)}
+                    />
+                  </h4>
                   <div className={styles.section_four_header}>
                     <DropDown
                       changeDefaultValue={setSelectedLanguage}
                       defaultValue={selectedLanguage}
                       valuesList={["Javascript", "Python"]}
                     />
-                    <Button className={styles.tryAgent} onClick={tryAgent}>Send Request</Button>
+                    <Button className={styles.tryAgent} onClick={tryAgent}>
+                      Send Request
+                    </Button>
                   </div>
 
                   <div className={styles.code_highlighter}>
@@ -647,7 +689,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                     </SyntaxHighlighter>
                   </div>
                 </section>
-              ) : (
+              ) : selectedSection == 3 ? (
                 <PaymentBill
                   type="credit"
                   width="30%"
@@ -655,11 +697,11 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                   agent={agentDetails}
                   creditAmount={credits}
                 />
-              )}
+              ) : null}
             </div>
           </Page>
         </div>
-      )}
+      ) : <Loading />}
     </>
   );
 };

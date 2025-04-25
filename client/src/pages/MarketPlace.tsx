@@ -7,6 +7,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import NotFound from "../components/NotFound";
 import Notification from "../utils/notification";
+import { AiOutlineMenu } from "react-icons/ai";
+import Navbar from "../layouts/Navbar";
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -56,7 +58,8 @@ const MarketPlace: FC<MarketPlaceProps> = ({}) => {
   }, [searchQuery]);
 
   return (
-    <Page>
+    <Page width="fit">
+      <Navbar btn={false}/>
       <Input
         onKeyDown={(e) =>
           //@ts-ignore

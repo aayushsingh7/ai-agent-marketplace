@@ -7,21 +7,16 @@ import { BsFillLightningChargeFill } from "react-icons/bs";
 import { TbContract } from "react-icons/tb";
 import { FaHandsHelping } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import Page from "../components/Page";
+import Navbar from "../layouts/Navbar";
 
 interface HomeProps {}
 
 const Home: FC<HomeProps> = ({}) => {
   const navigate = useNavigate();
   return (
-    <div className={styles.home_page}>
-      <header>
-        <nav>
-          <h3>
-            Sei<span>Agents</span>
-          </h3>
-          <Button onClick={() => navigate("/auth")}>Connect Wallet</Button>
-        </nav>
-      </header>
+    <div className={styles.home_page}>  
+    <Navbar btn={true} permanent={true}/>
       <section className={styles.hero_section}>
         <div className={styles.hero_section_texts}>
           <h1>
@@ -42,7 +37,7 @@ const Home: FC<HomeProps> = ({}) => {
         </div>
         <div className={styles.steps}>
           <div className={styles.step}>
-            <h3>Explore AI Agents</h3>
+            <h3>1. Explore AI Agents</h3>
             <p>
               Browse a decentralized marketplace of AI agents built by
               developers — ranging from chatbots to content generators.
@@ -50,7 +45,7 @@ const Home: FC<HomeProps> = ({}) => {
           </div>
 
           <div className={styles.step}>
-            <h3>Buy Credits or NFTs</h3>
+            <h3>2. Buy Credits or NFTs</h3>
             <p>
               Purchase credits via smart contract to rent agents or buy entire
               agents as NFTs for full access and ownership.
@@ -58,7 +53,7 @@ const Home: FC<HomeProps> = ({}) => {
           </div>
 
           <div className={styles.step}>
-            <h3>Unlock Access</h3>
+            <h3>3. Unlock Access</h3>
             <p>
               Access is granted through on-chain validation while the agents run
               off-chain for fast and efficient performance.
@@ -66,7 +61,7 @@ const Home: FC<HomeProps> = ({}) => {
           </div>
 
           <div className={styles.step}>
-            <h3>Use the Agent</h3>
+            <h3>4. Use the Agent</h3>
             <p>
               Interact with the agent via API or platform interface — powered by
               your credits or NFT-based access rights.
@@ -198,7 +193,7 @@ const Home: FC<HomeProps> = ({}) => {
           </figure>
         </div>
       </section>
-    </div>
+     </div>
   );
 };
 

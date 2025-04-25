@@ -9,6 +9,7 @@ import AgentBox from "../components/AgentBox";
 import { useAppContext } from "../context/contextAPI";
 import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
+import Navbar from "../layouts/Navbar";
 
 interface MyNFTsProps {}
 
@@ -41,9 +42,9 @@ const MyNFTs: FC<MyNFTsProps> = ({}) => {
  
 
   return (
-    <Page>
-      <div className={styles.subs_page}>
-        <h3 style={{ marginBottom: "30px" }}>Your Subscriptions</h3>
+    <Page width="fit">
+        <Navbar btn={false} />
+        <h3 style={{ marginBottom: "30px" }}>My NFTs</h3>
         <Input
           placeholder="Search Agent"
           onKeyDown={(e) =>
@@ -68,7 +69,6 @@ const MyNFTs: FC<MyNFTsProps> = ({}) => {
             ))}
           </section>
         )}
-      </div>
     </Page>
   );
 };

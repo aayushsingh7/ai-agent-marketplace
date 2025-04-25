@@ -41,13 +41,23 @@ class UserService {
 
   async fetchSubscriptions(userID) {
     try {
+      const user = await this.user.findOne({ _id: userID });
       const results = await this.credits
         .find({ user: userID })
         .populate({
           path: "agent",
-          select: "name description category verified walletAddress",
+          select: "name description category verified walletAddress owner",
+          // Include owner in the selection to use for filtering
         })
-        .select("agent");
+        .then((credits) => {
+          // Filter out credits where the user is the owner of the agent
+          return credits.filter(
+            (credit) =>
+              credit.agent &&
+              credit.agent.owner &&
+              !credit.agent.owner.equals(userID)
+          );
+        });
 
       return results;
     } catch (err) {

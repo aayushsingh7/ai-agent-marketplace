@@ -166,7 +166,7 @@ const Auth = () => {
   };
 
   return (
-    <Page>
+    <Page width="full">
       <>
         {loading ? (
           <h2>Please Wait...</h2>

@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
 import Notification from "../utils/notification";
 import { AiOutlineClose } from "react-icons/ai";
+import Navbar from "../layouts/Navbar";
 
 interface UploadProps {}
 
@@ -30,6 +31,7 @@ const Upload: FC<UploadProps> = ({}) => {
   const [agentPlanType, setAgentPlanType] = useState<string>("Paid");
   const [usageLicense, setUsageLicense] = useState<string>("Commercial Use");
   const [agentStatus, setAgentStatus] = useState<string>("Available");
+  const [showPreview, setShowPreview] = useState<boolean>(false);
 
   const [tags, setTags] = useState<any[]>([]);
   const [trainedOn, setTrainedOn] = useState<any[]>([]);
@@ -102,9 +104,10 @@ const Upload: FC<UploadProps> = ({}) => {
   };
 
   return (
-    <Page width="100%">
+    <Page width="fit">
       <div className={styles.upload_page}>
-        <h3>Upload Agent</h3>
+        <Navbar btn={false} />
+        <h3 style={{marginTop:"20px"}}>Upload Agent</h3>
         <form
           className={`${styles.form} ${
             formSection == 0 ? styles.sixty : styles.full
@@ -396,22 +399,30 @@ const Upload: FC<UploadProps> = ({}) => {
             </>
           ) : (
             <section className={styles.form_section}>
-              <h3>🐱‍🏍 Add a Detailed Documentation (Markdown)</h3>
+              <h3>
+                <span>🐱‍🏍 Add a Detailed Documentation (Markdown)</span>{" "}
+                <Button onClick={() => setShowPreview(!showPreview)}>
+                  {showPreview ? "Hide Preview" : "Show Preview"}
+                </Button>
+              </h3>
               <div
                 data-color-mode="light"
                 className={styles.markdown_container}
               >
-                <textarea
-                  onChange={(e) => setMarkdownText(e.target.value)}
-                ></textarea>
-                <div className={styles.preview}>
-                  <MarkdownPreview
-                    style={{ padding: "20px" }}
-                    wrapperElement={{ "data-color-mode": "light" }}
-                    source={markdownText}
-                  />
-                </div>
-                {/* <MDEditor.Markdown source={`# How are ou`} style={{ whiteSpace: 'pre-wrap',height:"500px" }} /> */}
+                {showPreview ? (
+                  <div className={styles.preview}>
+                    <MarkdownPreview
+                      style={{ padding: "20px" }}
+                      wrapperElement={{ "data-color-mode": "light" }}
+                      source={markdownText}
+                    />
+                  </div>
+                ) : (
+                  <textarea
+                  value={markdownText}
+                    onChange={(e) => setMarkdownText(e.target.value)}
+                  ></textarea>
+                )}
               </div>
             </section>
           )}

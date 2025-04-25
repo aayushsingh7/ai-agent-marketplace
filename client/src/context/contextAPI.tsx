@@ -9,7 +9,11 @@ type AppContextType = {
   processingText: string;
   isProcessing: boolean;
   editNFT:boolean;
+  agentUsage:boolean;
   processingDescription: string;
+  showSideNav:boolean; 
+  setShowSideNav:any;
+  setAgentUsage:any;
   setEditNFT:any;
   setShowBuyAgent: any;
   setIsProcessing: any;
@@ -34,7 +38,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [editNFT, setEditNFT] = useState<boolean>(false);
-
+  const [agentUsage,setAgentUsage] = useState<boolean>(false);
+  const [showSideNav, setShowSideNav] = useState<boolean>(false)
+  
   const value: AppContextType = {
     loggedInUser,
     verifyUser,
@@ -44,6 +50,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     processingText,
     isProcessing,
     editNFT,
+    agentUsage,
+    showSideNav, 
+    setShowSideNav,
+    setAgentUsage,
     setEditNFT,
     setIsProcessing,
     setProcessingDescription,

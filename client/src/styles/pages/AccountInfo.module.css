@@ -1,48 +1,65 @@
-.accountInfo{
-padding-left: 20px;
-width: 60%;
+.accountInfo {
+  padding-left: 20px;
+  width: 60%;
 }
 
-.input_field{
-    margin-top: 5px
+.input_field {
+  margin-top: 5px;
 }
 
-.input_field span{
-    font-size: 0.56rem;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #666666;
-    display: inline-block;
+.input_field span {
+  font-size: 0.56rem;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #666666;
+  display: inline-block;
 }
 
-.input_field input{
-    font-size: 0.56rem;
-    padding: 10px ;
-    border: none;
-    background: #efefef;
-    border-radius: 4px;
+.input_field input {
+  font-size: 0.56rem;
+  padding: 10px;
+  border: none;
+  background: #efefef;
+  border-radius: 4px;
+}
+
+.form_section {
+  border-bottom: 2px solid #dfdfdf;
+  padding-bottom: 20px;
+  margin-top: 40px;
+}
+
+.input_field p {
+  font-size: 0.5rem;
+  font-weight: 600;
+  color: #b30000;
+  margin-top: 5px;
+}
+
+.form_section button {
+  font-size: 0.6rem;
+  padding: 10px 15px;
+  margin-top: 30px;
+  color: #ffffff;
+  background: #b30000;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .accountInfo {
+    width: 100%;
+  }
 }
 
 
-
-.form_section{
- border-bottom: 2px solid #dfdfdf;
- padding-bottom: 20px;
- margin-top: 40px;
-}
-
-.input_field p{
-    font-size: 0.5rem;
-    font-weight: 600;
-    color: #b30000;
-    margin-top: 5px;
-}
-
-.form_section button{
-    font-size: 0.6rem;
-    padding: 10px 15px;
-    margin-top: 30px;
-    color: #ffffff;
-    background: #b30000;
-    font-weight: 600;
+@media (max-width:1000px) {
+    .input_field input {
+        font-size: 0.7rem;
+      }
+      .input_field p {
+        font-size: 0.7rem;
+      }
+      .input_field span {
+        font-size: 0.7rem;
+      }
 }

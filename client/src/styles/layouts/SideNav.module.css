@@ -23,6 +23,7 @@
     display: flex;
     align-items: center;
     font-size: 1.1rem;
+    justify-content: space-between;
     color: #b30000;
   }
   
@@ -93,13 +94,21 @@
   .hide {
     left: 0;
   }
+
+  .close_icon{
+    display: none;
+  }
   
-  @media (max-width: 900px) {
+  @media (max-width: 1000px) {
+    .close_icon{
+      display: block;
+    }
     .sidenav {
       position: fixed;
       left: 0;
       top: 0;
       z-index: 10;
+      width: 250px;
     }
   
     .sidenav h2 svg {
@@ -107,7 +116,7 @@
     }
   
     .hide {
-      left: -1000%;
+      left: -100%;
     }
   }
   
@@ -118,3 +127,15 @@
     height: 100%;
     flex: 1;
   }
+
+@media (max-width:700px) {
+  .sidenav {
+    width: 60%;
+  }
+}
+
+@media (max-width:500px) {
+  .sidenav{
+    width: 100%;
+  }
+}

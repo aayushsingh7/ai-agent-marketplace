@@ -1,9 +1,9 @@
 import { FC, useEffect, useState } from "react";
 import Page from "../components/Page";
-import styles from "../styles/pages/AccountInfo.module.css";
 import Input from "../components/ui/Input";
 import { useAppContext } from "../context/contextAPI";
-import Button from "../components/ui/Button";
+import styles from "../styles/pages/AccountInfo.module.css";
+import Navbar from "../layouts/Navbar";
 
 interface AccountInfoProps {}
 
@@ -18,8 +18,8 @@ const AccountInfo: FC<AccountInfoProps> = ({}) => {
   },[loggedInUser])
 
   return (
-    <Page>
-      <div className={styles.accountInfo}>
+    <Page width="fit">
+    <Navbar btn={false}/>
           <h3>Account Info</h3>
         <section className={styles.form_section}>
         
@@ -44,7 +44,7 @@ const AccountInfo: FC<AccountInfoProps> = ({}) => {
 
 
         </section>
-      </div>
+      {/* </div> */}
     </Page>
   );
 };

@@ -1,46 +1,48 @@
 import { FC, useEffect, useState } from "react";
 import Page from "../components/Page";
-import styles from "../styles/pages/Usage.module.css";
+import styles from "../styles/layouts/Usage.module.css";
 import AgentBox from "../components/AgentBox";
 import AreaChart from "../components/ui/charts/AreaChart";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppContext } from "../context/contextAPI";
 import Notification from "../utils/notification";
 
-interface UsageProps {}
+interface UsageProps {
+  userCredit:any;
+}
 
-const Usage: FC<UsageProps> = ({}) => {
+const Usage: FC<UsageProps> = ({userCredit}) => {
   const { agentID } = useParams();
   const { loggedInUser } = useAppContext();
-  const [userCredit, setUserCredit] = useState<any>();
+  // const [userCredit, setUserCredit] = useState<any>();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!loggedInUser?._id) navigate("/auth");
-    const fetchUserCredit = async () => {
-      if (!loggedInUser?._id) return;
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/users/${
-            loggedInUser?._id
-          }/agents/${agentID}/user-credit`,
-          {
-            credentials: "include",
-          }
-        );
-        const credit = await response.json();
-        setUserCredit(credit.data);
-      } catch (err) {
-        Notification.error(
-          "Oops! something went wrong while fetching user credit"
-        );
-      }
-    };
-    fetchUserCredit();
-  }, [agentID]);
+  // useEffect(() => {
+  //   if (!loggedInUser?._id) navigate("/auth");
+  //   const fetchUserCredit = async () => {
+  //     if (!loggedInUser?._id) return;
+  //     try {
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_API_URL}/users/${
+  //           loggedInUser?._id
+  //         }/agents/${agentID}/user-credit`,
+  //         {
+  //           credentials: "include",
+  //         }
+  //       );
+  //       const credit = await response.json();
+  //       setUserCredit(credit.data);
+  //     } catch (err) {
+  //       Notification.error(
+  //         "Oops! something went wrong while fetching user credit"
+  //       );
+  //     }
+  //   };
+  //   fetchUserCredit();
+  // }, [agentID]);
 
   return (
-    <Page width="100%">
+    <Page width="fit">
       <div className={styles.usage_page}>
         <h3>Agent Usage</h3>
 

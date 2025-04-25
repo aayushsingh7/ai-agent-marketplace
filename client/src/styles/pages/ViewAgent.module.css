@@ -1,7 +1,7 @@
 .section_container {
   width: 100%;
   display: flex;
-  margin-top: 40px;
+  /* margin-top: 40px; */
 }
 
 .section_one,
@@ -13,8 +13,8 @@
   /* height: 80dvh; */
 }
 
-.section_two{
-  padding:0px 20px;
+.section_two {
+  padding: 0px 20px;
 }
 
 .section_four {
@@ -30,12 +30,12 @@ table {
   font-size: 0.58rem;
   margin-top: 20px;
 }
-thead{
-    background-color: #efefef;
+thead {
+  background-color: #efefef;
 }
 
 th,
-td{
+td {
   border: 1px solid #d1d1d1;
   text-align: left;
   padding: 8px;
@@ -46,57 +46,57 @@ tr:nth-child(even) {
   background-color: #efefef;
 }
 
-.more_details{
-    border-top: 2px solid #efefef;
-    margin-top: 40px;
-   padding-top: 20px;
+.more_details {
+  border-top: 2px solid #efefef;
+  margin-top: 40px;
+  padding-top: 20px;
 }
 
-.more_details h4{
-    font-size: 0.6rem;
-    /* color: #b30000; */
-    color: #000;
+.more_details h4 {
+  font-size: 0.6rem;
+  /* color: #b30000; */
+  color: #000;
 }
 
 .blockchain_info,
-.owner_info{
-    margin-top: 40px;
+.owner_info {
+  margin-top: 40px;
 }
 
-.section_four h4{
+.section_four h4 {
   font-size: 0.7rem;
   padding: 10px;
 }
 
-.section_four_header{
+.section_four_header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 10px;
 }
 
-.code_highlighter{
+.code_highlighter {
   margin-top: 20px;
 }
 
-.code_highlighter h4{
+.code_highlighter h4 {
   font-size: 0.57rem;
   padding: 10px 0px;
 }
 
-.credits_info{
+.credits_info {
   font-size: 0.66em;
   color: #555555;
   margin: 20px 0px;
 }
 
-.credits_options{
+.credits_options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   row-gap: 20px;
   column-gap: 20px;
 }
-.credit_box{
+.credit_box {
   transition: 0.3s ease-in-out;
   background: #efefef;
   border-radius: 5px;
@@ -106,18 +106,18 @@ tr:nth-child(even) {
   border: 2px solid #efefef;
 }
 
-.credit_box h5{
+.credit_box h5 {
   font-size: 0.6rem;
   margin-bottom: 10px;
   font-weight: 700;
   color: #666666;
 }
 
-.credit_box span{
+.credit_box span {
   font-size: 1.5rem;
 }
 
-.blocks p{
+.blocks p {
   padding: 5px 0px;
   display: flex;
   align-items: center;
@@ -126,7 +126,7 @@ tr:nth-child(even) {
   font-size: 0.6rem;
 }
 
-.requestBody{
+.requestBody {
   font-size: 0.57rem;
   padding: 10px;
   background: #efefef;
@@ -137,40 +137,40 @@ tr:nth-child(even) {
   height: 150px;
 }
 
-.blocks{
-  padding:10px;
+.blocks {
+  padding: 10px;
   border-bottom: 2px solid #dfdfdf;
 }
 
-.payment_box{
+.payment_box {
   padding: 14px 20px 20px 20px;
   background: #ebebff;
   border-radius: 10px;
 }
 
-.payment h4{
-  font-size:0.9rem;
+.payment h4 {
+  font-size: 0.9rem;
   margin-bottom: 20px;
 }
 
-.credit_box:hover{
+.credit_box:hover {
   box-shadow: #b300009c 0px 3px 8px;
   border: 2px solid #b30000;
 }
 
-.selected_credit_plan{
+.selected_credit_plan {
   box-shadow: #b300009c 0px 3px 8px;
   border: 2px solid #b30000;
 }
 
-.agent_option{
+.agent_option {
   margin-top: 20px;
   display: flex;
   gap: 10px;
   margin-left: 50px;
 }
 
-.agent_option button{
+.agent_option button {
   font-size: 0.6rem;
   padding: 7px 12px;
   border-radius: 5px;
@@ -179,22 +179,116 @@ tr:nth-child(even) {
   background: none;
 }
 
-.agent_option button:nth-child(2){
+.agent_option button:nth-child(2) {
   background: #b30000;
   color: #ffffff;
   border: 3px solid #b30000;
 }
 
-.agent_option button:nth-child(1){
-color: #b30000;
-border: 2px solid #b30000;
+.agent_option button:nth-child(1) {
+  color: #b30000;
+  border: 2px solid #b30000;
 }
 
-.tryAgent{
+.section_four{
+  transition: 0.5s ease-in-out;
+}
+
+.try_api {
+  background: #dfdfdf;
+  display: none;
+}
+
+.tryAgent {
   padding: 7px 15px;
   font-size: 0.6rem;
   border-radius: 5px;
   background: #dfdfdf;
   border: none;
   cursor: pointer;
+}
+
+/* .section_four h4 {
+  display: none;
+} */
+
+.show_request {
+  right: 0%;
+}
+
+.hide_request {
+  right: 0%;
+}
+
+.section_four h4{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section_four h4 svg {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  
+  .section_four h4 {
+    font-size: 0.8rem;
+  }
+
+  .code_highlighter h4 {
+    font-size: 0.7rem;
+  }
+  .section_four h4 svg {
+    display: block;
+  }
+  .section_four {
+    position: fixed;
+    width: 50%;
+    padding: 20px;
+    top: 0%;
+    background: #ffffff;
+  }
+
+  .show_request {
+    right: 0%;
+  }
+
+  .hide_request {
+    right: -100%;
+  }
+
+  .section_one,
+  .section_two,
+  .section_three {
+    width: 100%;
+  }
+
+  .try_api {
+    background: #dfdfdf !important;
+    display: block;
+    color: #000000 !important;
+    border: none !important;
+  }
+
+}
+
+@media (max-width: 700px) {
+  .more_details{
+    overflow-x: scroll;
+  }
+  .section_one,
+  .section_two,
+  .section_three {
+    padding: 20px 0px;
+  }
+  .agent_option button {
+    min-width: 100px;
+  }
+  .section_four {
+    width: 100%;
+  }
+
+ 
+
 }

@@ -16,6 +16,20 @@ body::-webkit-scrollbar {
   width: 0px;
 }
 
+.full{
+  width: 100%;
+} 
+.fit{
+  width: calc(100% - 250px);
+}
+.half {
+  width: 60%;
+}
+
+.page{
+  padding: 30px;
+}
+
 .button{
   appearance: none;
   border: none;
@@ -288,4 +302,37 @@ font-size: 0.8rem;
   font-weight: 600;
   font-size: 0.65rem;
   margin-top: 10px;
+}
+
+/* .search_navbar{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search_navbar svg{
+  margin-right: 10px;
+} */
+
+@media (max-width:1000px) {
+  :root{
+    font-size: 19px;
+  }
+  .fit{
+    width: 100%;
+  }
+
+  .page h3{
+  display: none !important;
+  }
+}
+
+table tr{
+  word-break: break-all;
+}
+
+@media (max-width:600px) {
+  .page{
+    padding: 15px;
+  }
 }

@@ -1,0 +1,52 @@
+.permanent  nav{
+  display: flex;
+  padding: 30px 0px;
+}
+
+.temp  nav{
+  display: none;
+  padding: 10px;
+  background: #efefef;
+  border-radius: 10px;
+}
+
+.navbar nav {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar nav h4 {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  color: #b30000;
+}
+
+.navbar nav h4 span {
+  color: #000;
+}
+
+.navbar nav button {
+  font-size: 0.8rem;
+  padding: 10px 15px;
+  color: #ffffff;
+  background: #b30000;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+@media (max-width: 1000px) {
+  .navbar nav {
+    margin-bottom: 20px;
+  }
+  .temp nav {
+    display: flex;
+  }
+}
+
+
+@media (max-width:700px) {
+    .temp nav h4{
+        font-size: 0.9rem;
+    }
+}

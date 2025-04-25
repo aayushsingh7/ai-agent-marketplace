@@ -7,7 +7,6 @@ import Subscription from "./pages/Subscription";
 import Upload from "./pages/Upload";
 import SideNav from "./layouts/SideNav";
 import Auth from "./pages/Auth";
-import Usage from "./pages/Usage";
 import VerifyUser from "./layouts/VerifyUser";
 import { useAppContext } from "./context/contextAPI";
 import BuyAgentNFT from "./layouts/BuyAgentNFT";
@@ -66,15 +65,6 @@ const App: FC<AppProps> = ({}) => {
           }
         />
         <Route path="/marketplace/agents/:agentID" element={<ViewAgent />} />
-        <Route
-          path="/subscriptions/agents/:agentID"
-          element={
-            <div className="flex-page">
-              <SideNav type="normal" />
-              <Usage />
-            </div>
-          }
-        />
         <Route path="/auth" element={<Auth />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/nfts" element={ 

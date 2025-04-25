@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import NotFound from "../components/NotFound";
 import Notification from "../utils/notification";
+import Navbar from "../layouts/Navbar";
 
 interface SubscriptionProps {}
 
@@ -40,8 +41,8 @@ const Subscription: FC<SubscriptionProps> = ({}) => {
   }, [loggedInUser]);
 
   return (
-    <Page>
-      <div className={styles.subs_page}>
+    <Page width="fit">
+      <Navbar btn={false} />
         <h3 style={{ marginBottom: "30px" }}>Your Subscriptions</h3>
         <Input placeholder="Search Agent"
         onKeyDown={(e) =>
@@ -65,7 +66,6 @@ const Subscription: FC<SubscriptionProps> = ({}) => {
             ))}
           </section>
         )}
-      </div>
     </Page>
   );
 };
