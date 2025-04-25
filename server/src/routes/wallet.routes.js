@@ -1,11 +1,12 @@
 import { Router } from "express";
 import WalletController from "../controllers/wallet.controller.js";
 import authenticateUser from "../milddleware/authenticateUser.js";
+import uploadFile from "../milddleware/uploadFile.js";
 const walletRoutes = Router();
 const walletController = new WalletController();
 
 walletRoutes.get("/get-agent-credit-cost", walletController.getAgentCreditCost)
-walletRoutes.put("/mint", authenticateUser, walletController.createAgent);
+walletRoutes.put("/mint", authenticateUser, uploadFile, walletController.createAgent);
 walletRoutes.post("/prepare-buy-credits",authenticateUser, walletController.prepareBuyCredits)
 walletRoutes.post("/confirm-credit-purchase",authenticateUser,walletController.confirmCreditPurchase)
 walletRoutes.post("/prepare-buy-nft",authenticateUser,walletController.prepareBuyNFT)

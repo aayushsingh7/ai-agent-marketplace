@@ -230,6 +230,11 @@ tr:nth-child(even) {
   display: none;
 }
 
+.ownership_transactions{
+  height: 400px;
+  overflow-y: scroll;
+}
+
 @media (max-width: 1200px) {
   
   .section_four h4 {

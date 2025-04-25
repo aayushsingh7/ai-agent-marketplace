@@ -3,6 +3,7 @@ import { Schema, model } from "mongoose";
 const agentSchema = new Schema(
   {
     tokenId: { type: String },
+    agentIcon:{type:String,default:"https://res.cloudinary.com/dvk80x6fi/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1745587157/artificial-intelligence-silhouette-vector-icons-isolated-on-white-cyber-technologies-icon_cikjrz.jpg"},
     name: { type: String, required: true },
     description: { type: String, required: true },
     category: { type: String, required: true },
@@ -35,6 +36,7 @@ const agentSchema = new Schema(
     },
     ownershipHistory: [
       {
+        amount:{type:Number,default:0},
         owner: { type: String },
         type: { type: String, enum: ["Transfered", "Purchased", "Minted", "Updated"] },
         timestamp: { type: Date, default: Date.now },

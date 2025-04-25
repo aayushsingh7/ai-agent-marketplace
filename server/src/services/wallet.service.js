@@ -50,7 +50,7 @@ class WalletService {
     }
   }
 
-  async createAgent(wallet, recipient, agentData, gasLimit) {
+  async createAgent(wallet, recipient, agentData,agentIcon, gasLimit) {
     try {
       if (!recipient) {
         throw new CustomError("Recipient address is required", 400);
@@ -176,12 +176,12 @@ class WalletService {
           walletAddress: recipient,
         });
 
-        // Create the agent document
         const newAgent = await this.agentService.createAgent({
           ...agentData,
           tokenId: tokenId,
           creator: creator._id,
           owner: creator._id,
+          agentIcon:agentIcon,
           ownershipHistory: [ownershipRecord],
           blockchainDetails: blockchainDetails,
           salePrice,
@@ -214,59 +214,7 @@ class WalletService {
     }
   }
 
-  // async prepareBuyCredits(agentID, tokenId, creditAmount, userAddress) {
-  //   try {
-  //     if (
-  //       !tokenId ||
-  //       !creditAmount ||
-  //       creditAmount <= 0 ||
-  //       !agentID ||
-  //       !userAddress
-  //     ) {
-  //       throw new CustomError(
-  //         "Invalid token ID, agent ID, user address or credit amount",
-  //         400
-  //       );
-  //     }
-
-  //     const agent = await this.agent.findOne({ _id: agentID });
-  //     if (!agent) {
-  //       throw new CustomError("Agent not found", 404);
-  //     }
-
-  //     let user = await this.user.findOne({
-  //       walletAddress: userAddress.toLowerCase(),
-  //     });
-
-  //     if (!user)
-  //       throw new CustomError(
-  //         "User account not found. Please connect your wallet address to continue.",
-  //         404
-  //       );
-
-  //     const provider = new ethers.JsonRpcProvider(this.rpcUrl);
-  //     const contract = new ethers.Contract(this.contractAddress, ABI, provider);
-  //     const creditCost = await contract.getAgentCreditCost(tokenId);
-
-  //     const totalCostInWei = creditCost * BigInt(creditAmount);
-  //     return {
-  //       contractAddress: this.contractAddress,
-  //       contractABI: ABI,
-  //       method: "buyCredit",
-  //       params: [tokenId, creditAmount],
-  //       value: totalCostInWei.toString(),
-  //       agentID,
-  //       creditAmount,
-  //       userAddress,
-  //     };
-  //   } catch (err) {
-  //     console.error("Prepare buy credits error:", err);
-  //     throw new CustomError(
-  //       err.message || "Failed to prepare buy credits transaction",
-  //       500
-  //     );
-  //   }
-  // }
+ 
 
   async prepareBuyCredits(agentID, tokenId, creditAmount, userAddress) {
     try {
@@ -444,6 +392,7 @@ class WalletService {
         method: "buyAgent",
         params: [tokenId],
         value: salePriceInWei.toString(),
+        valueInSei:salePriceInSei,
         agentID,
       };
     } catch (err) {
@@ -455,7 +404,7 @@ class WalletService {
     }
   }
 
-  async recordNFTPurchase(txHash, agentID, userAddress, gasFee, gasFeeInEth) {
+  async recordNFTPurchase(txHash, agentID, userAddress, valueInSei, gasFee, gasFeeInEth) {
     try {
       const agent = await this.agent.findOne({ _id: agentID });
       if (!agent) {
@@ -471,6 +420,7 @@ class WalletService {
       agent.ownershipHistory = [
         ...agent.ownershipHistory,
         {
+          amount:valueInSei,
           owner: userAddress,
           type: "Purchased",
           timestamp: new Date().toISOString(),

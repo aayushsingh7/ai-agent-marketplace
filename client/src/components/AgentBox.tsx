@@ -32,6 +32,10 @@ const AgentBox: FC<AgentBoxProps> = ({
         </p>
       )}
 
+      {location.pathname.startsWith("/subscription") &&   <p title="Agent Category" className={styles.agent_type_tag} style={{marginLeft:"8px"}}>
+          Subscribed
+        </p>}
+
       {(loggedInUser?._id == data.owner || loggedInUser?.walletAddress == data?.owner?.walletAddress)&& (
         <p
           title="Agent Category"
@@ -45,7 +49,7 @@ const AgentBox: FC<AgentBoxProps> = ({
         <div className={styles.image_section}>
           <div className={styles.agent_image}>
             <img
-              src="https://cdn.britannica.com/47/246247-050-F1021DE9/AI-text-to-image-photo-robot-with-computer.jpg "
+             src={data?.agentIcon || "https://res.cloudinary.com/dvk80x6fi/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1745587157/artificial-intelligence-silhouette-vector-icons-isolated-on-white-cyber-technologies-icon_cikjrz.jpg"}
               alt=""
             />
           </div>
@@ -70,18 +74,19 @@ const AgentBox: FC<AgentBoxProps> = ({
                 </span>
                 <span
                   className={styles.tag}
-                  aria-label="Response Time (ms)"
-                  title="Response Time (ms)"
-                >
-                  <FaClock /> {data.responseTime} ms
-                </span>
-                <span
-                  className={styles.tag}
                   aria-label="Plan Type"
                   title="Plan Type"
                 >
                   <BiSolidDollarCircle style={{ fontSize: "16px" }} />{" "}
                   {data.planType}
+                </span>
+
+                <span
+                  className={styles.tag}
+                  aria-label="Response Time (ms)"
+                  title="Response Time (ms)"
+                >
+                {data.isForSale ? "For Sale" : "Not For Sale"}
                 </span>
               </div>
 
@@ -97,9 +102,9 @@ const AgentBox: FC<AgentBoxProps> = ({
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   className={styles.see_usage}
-                  to={`/subscriptions/agents/${data._id}`}
+                  to={`/marketplace/agents/${data._id}?tab=4`}
                 >
-                  "View Usage Details"
+                  View Usage Details
                 </Link>
               )}
             </>

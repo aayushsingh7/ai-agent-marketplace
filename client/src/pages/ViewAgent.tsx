@@ -19,8 +19,13 @@ import Usage from "../layouts/Usage";
 import Navbar from "../layouts/Navbar";
 import { AiOutlineClose } from "react-icons/ai";
 import Loading from "../components/Loading";
+import formatDate from "../utils/formatDate";
 
 interface ViewAgentProps {}
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 
 const ViewAgent: FC<ViewAgentProps> = ({}) => {
   const {
@@ -33,9 +38,15 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
     setAgentUsage,
   } = useAppContext();
   const [selectedSection, setSelectedSection] = useState<number>(1);
+  const query = useQuery();
+  //@ts-ignore
+  const tab = query.get("tab");
+
   const navigate = useNavigate();
   const [agentDetails, setAgentDetails] = useState<any>();
   const params = useParams();
+  const [aiAgentResponesLoading, setAiAgentResponesLoading] =
+    useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] =
     useState<string>("Javascript");
   const [credits, setCredits] = useState<number>(100);
@@ -43,9 +54,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
   const [userCredit, setUserCredit] = useState<any>({});
   const [customValue, setCustomValue] = useState<boolean>(false);
   const [tryAgentAPI, setTryAgentAPI] = useState<boolean>(false);
-  const [requestBody, setRequestBody] = useState(`{
-    prompt:"give me the current trading market anaylsis"
-    }`);
+  const [requestBody, setRequestBody] = useState();
 
   const templateCode: any = {
     javascript: `
@@ -64,21 +73,21 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
           }"
         },
         credentials: "include",
-        body: JSON.stringify(${requestBody})
+        body: ${requestBody}
       })
         .then(response => response.json())
         .then(data => console.log(data))
         .catch(error => console.error("Error:", error));
-      `,
+    `,
 
     python: `
       import requests
       import json
-    
+  
       url = "http://localhost:4000/api/v1/agents/use?agentID=${
         agentDetails?._id
       }"
-    
+  
       headers = {
         "Content-Type": "application/json",
         "sei-agents-api-key": "${
@@ -89,15 +98,19 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
             : "trail-use-" + loggedInUser?._id
         }"
       }
-    
-      response = requests.${agentDetails?.requestMethod}(
+  
+      response = requests.${agentDetails?.requestMethod?.toLowerCase()}(
         url,
         headers=headers,
-        data=json.dumps(${requestBody})
+        ${
+          agentDetails?.requestMethod?.toUpperCase() === "GET"
+            ? ""
+            : `data=${requestBody}`
+        }
       )
-    
+  
       print(response.json())
-      `,
+    `,
   };
 
   useEffect(() => {
@@ -110,6 +123,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
 
   useEffect(() => {
     fetchUserCredit();
+    //@ts-ignore
   }, [loggedInUser, agentDetails]);
 
   const fetchAgentDetails = async (agentID: string) => {
@@ -120,6 +134,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       const data = await response.json();
       setAgentDetails(data.data);
       setSelectedAgent(data.data);
+      setRequestBody(JSON.parse(data.data.requestBody));
     } catch (err) {
       Notification.error("Oops! something went wrong while fetching agents");
     }
@@ -140,6 +155,8 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
       setUserCredit(credit.data);
       if (credit.data?._id) {
         setAgentUsage(true);
+        //@ts-ignore
+        if (tab == 4) setSelectedSection(4);
       } else {
         setAgentUsage(false);
       }
@@ -285,6 +302,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
   };
   const tryAgent = async () => {
     try {
+      setAiAgentResponesLoading(true);
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/agents/use?agentID=${
           agentDetails?._id
@@ -300,6 +318,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                 ? userCredit?.accessToken
                 : "trail-use-" + loggedInUser?._id,
           },
+          body: requestBody,
           credentials: "include",
         }
       );
@@ -308,6 +327,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
     } catch (err: any) {
       Notification.error(err.message);
     }
+    setAiAgentResponesLoading(false);
   };
   const getAgentCreditCost = async () => {
     if (!agentDetails) return;
@@ -320,12 +340,10 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
     console.log(creditCost);
   };
 
-  console.log(selectedSection);
-
   useEffect(() => {
-    console.log(loggedInUser);
     getAgentCreditCost();
   }, [agentDetails]);
+
   return (
     <>
       {agentDetails?._id ? (
@@ -371,7 +389,10 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                       </>
                     )}
 
-                    <Button className={styles.try_api} onClick={() => setTryAgentAPI(true)}>
+                    <Button
+                      className={styles.try_api}
+                      onClick={() => setTryAgentAPI(true)}
+                    >
                       Try API
                     </Button>
                   </div>
@@ -465,57 +486,65 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                     </div>
 
                     <div className={styles.owner_info}>
-                      <h4>Owner Details</h4>
-                      <table className={styles.agent_table}>
-                        <thead>
-                          <tr>
-                            <th scope="col">Attribute</th>
-                            <th scope="col">Details</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>Transaction Type:</td>
-                            <td>
-                              {
-                                agentDetails.ownershipHistory[
-                                  agentDetails.ownershipHistory.length - 1
-                                ].type
-                              }
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Owner Address:</td>
-                            <td>
-                              {
-                                agentDetails.ownershipHistory[
-                                  agentDetails.ownershipHistory.length - 1
-                                ].owner
-                              }
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Transaction Hash:</td>
-                            <td>
-                              {
-                                agentDetails.ownershipHistory[
-                                  agentDetails.ownershipHistory.length - 1
-                                ].transactionHash
-                              }
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Timestamp:</td>
-                            <td>
-                              {
-                                agentDetails.ownershipHistory[
-                                  agentDetails.ownershipHistory.length - 1
-                                ].timestamp
-                              }
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                      <h4>Ownership History & Transactions</h4>
+                      <div className={styles.ownership_transactions}>
+                      {agentDetails.ownershipHistory.map((history:any)=> {
+                        return (
+                          <table className={styles.agent_table}>
+                          <thead>
+                            <tr>
+                              <th scope="col">Attribute</th>
+                              <th scope="col">Details</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Transaction Type:</td>
+                              <td>
+                                {
+                                 history.type
+                                }
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td>Transaction Amount (SEI):</td>
+                              <td>
+                                {
+                                 history?.amount || "0.00"
+                                }
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td>Owner Address:</td>
+                              <td>
+                                {
+                                 history.owner
+                                }
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>Transaction Hash:</td>
+                              <td>
+                                {
+                                 history.transactionHash
+                                }
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>Timestamp:</td>
+                              <td>
+                                {
+                                  formatDate(history.timestamp)
+                                }
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        )
+                      })}
+                      </div>
                     </div>
                   </div>
                 </section>
@@ -604,7 +633,10 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                       className={`${styles.credit_box} ${
                         customValue && styles.selected_credit_plan
                       }`}
-                      onClick={() => setCustomValue(!customValue)}
+                      onClick={() => {
+                        setCustomValue(!customValue);
+                        setCredits(10);
+                      }}
                     >
                       <h5>CREDITS</h5>
                       <span>
@@ -616,8 +648,8 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                               setCredits(parseInt(e.target.value))
                             }
                             type="number"
-                            max={10000}
-                            min={1}
+                            max={5000}
+                            min={5}
                             defaultValue={10}
                             step={1}
                           />
@@ -672,6 +704,7 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                     <textarea
                       value={requestBody}
                       className={styles.requestBody}
+                      //@ts-ignore
                       onChange={(e) => setRequestBody(e.target.value)}
                     ></textarea>
                   </div>
@@ -682,8 +715,12 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
                       customStyle={{ fontSize: "14px" }}
                       language="javascript"
                       style={docco}
+                      wrapLines={true}
+                      wrapLongLines={true}
                     >
-                      {tryAgentResponse?.length == 0
+                      {aiAgentResponesLoading
+                        ? "// Fetching Response..."
+                        : tryAgentResponse?.length == 0
                         ? "// Response will appear here"
                         : JSON.stringify(tryAgentResponse)}
                     </SyntaxHighlighter>
@@ -701,7 +738,9 @@ const ViewAgent: FC<ViewAgentProps> = ({}) => {
             </div>
           </Page>
         </div>
-      ) : <Loading />}
+      ) : (
+        <Loading />
+      )}
     </>
   );
 };

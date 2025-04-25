@@ -168,6 +168,9 @@ After cloning, you’ll find three main directories:
    MINTER_PRIVATE_KEY=YOUR_MINTER_PRIVATE_KEY_HERE  # Metamask private key to mint on behalf of users
    RPC_URL=https://evm-rpc-testnet.sei-apis.com
    NODE_ENV=development
+   CLOUD_NAME = YOUR_CLOUDINARY_CLOUD_NAME
+   CLOUDINARY_API_KEY = YOUR_CLOUDINARY_API_KEY
+   CLOUDINARY_API_SECRET = YOUR_CLOUDINARY_API_SECRET
    ```
 
 4. Start the development server:

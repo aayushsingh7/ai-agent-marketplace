@@ -50,6 +50,7 @@ const Upload: FC<UploadProps> = ({}) => {
 
   const [tagTxt, setTagTxt] = useState<string>("");
   const [trainedOnTxt, setTrainedOnTxt] = useState<string>("");
+  const [agentIcon,setAgentIcon] = useState<string>("")
 
   const createAgent = async () => {
     setIsProcessing(true);
@@ -88,6 +89,7 @@ const Upload: FC<UploadProps> = ({}) => {
           body: JSON.stringify({
             agentData: data,
             recipient: loggedInUser?.walletAddress,
+            agentIcon:agentIcon,
           }),
           credentials: "include",
         }
@@ -102,6 +104,24 @@ const Upload: FC<UploadProps> = ({}) => {
       setIsProcessing(false);
     }
   };
+
+  function convertToBase64(e:any) {
+  
+    let file = e.files[0];
+    return new Promise((resolve, reject) => {
+      const reader:any = new FileReader();
+      
+      reader.readAsDataURL(file); 
+  
+      reader.onload = () => {
+        resolve(reader.result)
+        setAgentIcon(reader.result)
+        console.log(reader.result)
+      };
+      
+      reader.onerror = (error:any) => reject(error);
+    });
+  }
 
   return (
     <Page width="fit">
@@ -126,6 +146,15 @@ const Upload: FC<UploadProps> = ({}) => {
             <>
               <section className={styles.form_section}>
                 <h3>✨ Agent Information</h3>
+                <div className={styles.input_field}>
+                  <span>Enter Customize Agent Icon</span>
+                  <Input
+                    placeholder=""
+                    onChange={(e)=> convertToBase64(e.target)}
+                    type="file"
+                  />
+                </div>
+
                 <div className={styles.input_field}>
                   <span>Enter Agent Name</span>
                   <Input

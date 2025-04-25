@@ -42,3 +42,15 @@
     border-bottom: 2px solid #dfdfdf;
   }
   
+
+@media (max-width:700px) {
+  .payment_box h4{
+    font-size: 0.9rem !important;
+  }
+  .payment h4{
+    font-size: 0.9rem;
+  }
+  .blocks p{
+    font-size: 0.7rem;
+  }
+}

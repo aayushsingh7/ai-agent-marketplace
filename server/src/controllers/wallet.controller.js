@@ -15,12 +15,13 @@ class WalletController {
   }
 
   async createAgent(req, res) {
-    const { recipient, agentData, gasLimit } = req.body;
+    const { recipient, agentData, agentIcon,gasLimit } = req.body;
     try {
       const agent = await this.walletService.createAgent(
         minterWallet,
         recipient,
         agentData,
+        agentIcon,
         gasLimit
       );
 
@@ -120,13 +121,20 @@ class WalletController {
 
   async confirmNFTPurchase(req, res) {
     try {
-      const { transactionHash, agentID, walletAddress, gasFee, gasFeeInEth } =
-        req.body;
+      const {
+        transactionHash,
+        agentID,
+        walletAddress,
+        valueInSei,
+        gasFee,
+        gasFeeInEth,
+      } = req.body;
 
       const result = await this.walletService.recordNFTPurchase(
         transactionHash,
         agentID,
         walletAddress,
+        valueInSei,
         gasFee,
         gasFeeInEth
       );

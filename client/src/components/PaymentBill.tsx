@@ -9,6 +9,7 @@ interface PaymentBillProps {
   func: any;
   width: string;
   type: "credit" | "nft";
+  className?:string;
 }
 
 const PaymentBill: FC<PaymentBillProps> = ({
@@ -17,12 +18,13 @@ const PaymentBill: FC<PaymentBillProps> = ({
   func,
   width,
   type,
+  className,
 }) => {
   const [agree, setAgree] = useState<boolean>(false);
   return (
     <section
       style={{ width }}
-      className={`${styles.section_four} ${styles.payment}`}
+      className={`${styles.section_four} ${styles.payment} ${className}`}
     >
       <div className={styles.payment_box}>
         <h4>Payment Summary</h4>
