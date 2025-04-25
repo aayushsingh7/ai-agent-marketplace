@@ -320,7 +320,7 @@ class WalletService {
         userCredit = new this.credit({
           walletAddress: userAddress.toLowerCase(),
           agent: agentID,
-          totalCredits: creditAmount,
+          totalCredits: credits,
           creditsUsed: 0,
           tokenId: tokenId,
           creditsCostPerRequest: agent.rentingDetails.creditCostPerReq,
