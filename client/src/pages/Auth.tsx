@@ -15,12 +15,13 @@ const Auth = () => {
   const [networkName, setNetworkName] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
+  const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
+  const [showAccountSelection, setShowAccountSelection] = useState(false);
 
   useEffect(() => {
     if (loggedInUser?._id) navigate("/marketplace");
   }, [loggedInUser]);
 
-  // Add SEI EVM network to MetaMask
   const addSeiEvmNetwork = async () => {
     // @ts-ignore
     if (typeof window.ethereum === "undefined") {
@@ -33,7 +34,7 @@ const Auth = () => {
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0x530", // 1328 in decimal (SEI EVM Testnet)
+            chainId: "0x530",
             chainName: "Sei",
             nativeCurrency: {
               name: "SEI",
@@ -41,7 +42,6 @@ const Auth = () => {
               decimals: 18,
             },
             rpcUrls: ["https://evm-rpc-testnet.sei-apis.com"],
-            // blockExplorerUrls: [] // Add if you have a valid testnet explorer URL
           },
         ],
       });
@@ -53,7 +53,6 @@ const Auth = () => {
     }
   };
 
-  // Switch to SEI EVM network
   const switchToSeiEvm = async () => {
     // @ts-ignore
     if (typeof window.ethereum === "undefined") {
@@ -64,14 +63,13 @@ const Auth = () => {
       // @ts-ignore
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x2BCA" }], // 11210 in hex for SEI EVM Testnet
+        params: [{ chainId: "0x2BCA" }],
       });
 
       return true;
     } catch (err: any) {
       console.error("Error switching network:", err);
 
-      // This error code indicates that the chain has not been added to MetaMask
       if (err.code === 4902) {
         return addSeiEvmNetwork();
       }
@@ -79,22 +77,16 @@ const Auth = () => {
     }
   };
 
-  // Connect wallet - simplified version to identify the error
-  const connectWallet = async () => {
+  const fetchAccounts = async () => {
     setIsConnecting(true);
     setError("");
 
     try {
-      // First, just try to get accounts without network switching
       // @ts-ignore
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
 
-      const address = accounts[1];
-      setWalletAddress(address);
-
-      // Once we have the address, we can try to switch networks
       try {
         await switchToSeiEvm();
         setNetworkName("SEI EVM Testnet");
@@ -103,11 +95,12 @@ const Auth = () => {
           "Network switching failed but we can continue:",
           networkErr
         );
-        // Continue with login even if network switching failed
       }
 
-      // Proceed with login
-      await handleLogin(address);
+
+      setAvailableAccounts(accounts);
+      setShowAccountSelection(true);
+      setIsConnecting(false);
     } catch (err: any) {
       console.error("Wallet connection error:", err);
       setError(`Connection failed: ${err.message || JSON.stringify(err)}`);
@@ -115,7 +108,14 @@ const Auth = () => {
     }
   };
 
-  // Sign message and login
+  const selectAccount = async (address: string) => {
+    setWalletAddress(address);
+    setShowAccountSelection(false);
+    
+  
+    await handleLogin(address);
+  };
+
   const handleLogin = async (address: string) => {
     try {
       const nonceResponse = await fetch(
@@ -165,6 +165,75 @@ const Auth = () => {
     }
   };
 
+  const AccountSelectionModal = () => {
+    if (!showAccountSelection) return null;
+    
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 1000,
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: "10px",
+            padding: "20px",
+            width: "400px",
+            maxWidth: "90%",
+          }}
+        >
+          <h2 style={{fontSize:"1rem"}}>Select an Account</h2>
+          <p style={{fontSize:"0.7rem",fontWeight:"600",color:"#777777",margin:"10px 0px"}}>Choose one of your MetaMask accounts to connect:</p>
+          
+          <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+            {availableAccounts.map((account) => (
+              <div
+                key={account}
+                style={{
+                  padding: "10px",
+                  margin: "5px 0",
+                  border: "1px solid #ddd",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                  fontSize:"16px",
+                }}
+                onClick={() => selectAccount(account)}
+              >
+                {account.slice(0, 6)}...{account.slice(-4)}
+              </div>
+            ))}
+          </div>
+          
+          <div style={{ marginTop: "15px", textAlign: "right" }}>
+            <Button
+              onClick={() => setShowAccountSelection(false)}
+              style={{
+                padding: "8px 15px",
+                fontSize: "0.9rem",
+                color: "#000",
+                background: "#ddd",
+                borderRadius: "5px",
+                marginRight: "10px",
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Page width="full">
       <>
@@ -205,7 +274,7 @@ const Auth = () => {
               </div>
             ) : (
               <Button
-                onClick={connectWallet}
+                onClick={fetchAccounts}
                 disabled={isConnecting}
                 style={{
                   padding: "15px",
@@ -219,6 +288,8 @@ const Auth = () => {
                 {isConnecting ? "Connecting..." : "Connect MetaMask"}
               </Button>
             )}
+            
+            <AccountSelectionModal />
           </div>
         )}
       </>
