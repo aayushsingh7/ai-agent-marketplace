@@ -79,7 +79,12 @@ class UserController {
 
   async logout(req, res) {
     try {
-      res.clearCookie("seiagents");
+      res.clearCookie("seiagents",{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "None", 
+        path: "/",
+      });
       res
         .status(200)
         .send({ success: true, message: "User logout successfully" });
